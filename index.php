@@ -11,10 +11,16 @@ session_start();
     <title>SCOT</title><!-- Sistema de Control de Tiempos de Comida -->
 </head>
 <body>
+    <?php
+        $currentPath="".dirname($_SERVER['REQUEST_URI']);
+        $login =  $currentPath."/login.php";
+        $dashboard =  $currentPath."/dashboard.php";
+        $mainLink = (!isset($_SESSION['verification']))?$login:$dashboard;
+        $linkText = (!isset($_SESSION['verification']))?"Login":"Panel de control";
+    ?>
     <nav>
         <div>
-            <a href="<?php echo (!isset($_SESSION['verificar']))?'/login':'/dashboard' ?>"><?php echo (!isset($_SESSION['verificar']))?'Login':'Panel de control' ?></a>
-            
+            <a href="<?php echo (isset($mainLink)?$mainLink:"") ?>"><?php echo (isset($linkText)?$linkText:"")  ?></a>
         </div>
     </nav>
 </body>

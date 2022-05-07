@@ -1,54 +1,59 @@
-DROP DATABASE IF EXISTS tiempos_comida;
-
+DROP DATABASE IF EXISTS scot;
+CREATE DATABASE scot;
+USE scot;
 DROP USER IF EXISTS 'comidaAdmin'@'%';
 DROP USER IF EXISTS 'comidaAdmin'@'localhost';
 CREATE USER 'comidaAdmin'@'%' IDENTIFIED BY 'root123';
 CREATE USER 'comidaAdmin'@'localhost' IDENTIFIED BY 'root123';
-GRANT ALL PRIVILEGES ON proyecto1.* TO 'comidaAdmin'@'%';
-GRANT ALL PRIVILEGES ON proyecto1.* TO 'comidaAdmin'@'localhost';
+GRANT ALL PRIVILEGES ON scot.* TO 'comidaAdmin'@'%';
+GRANT ALL PRIVILEGES ON scot.* TO 'comidaAdmin'@'localhost';
 
-CREATE TABLE usuarios(
-    username varchar(10) NOT NULL,
+CREATE TABLE users(
+    email varchar(100) NOT NULL,
     password varchar(50) NOT NULL,
-    PRIMARY KEY (username)
+    is_su TINYINT NOT NULL,
+    is_admin TINYINT NOT NULL,
+    PRIMARY KEY (email)
 );
 
-CREATE TABLE secciones(
+CREATE TABLE sections(
     id VARCHAR(10) PRIMARY KEY NOT NULL,
-    descripciON varchar(100) NOT NULL 
+    description varchar(100) NOT NULL 
 );
 
-CREATE TABLE alumnos(
-    cedula VARCHAR(12) PRIMARY KEY,
-    nombre VARCHAR(20) NOT NULL,
-    apellidos VARCHAR(100) NOT NULL,
-    id_seccion VARCHAR(10) NOT NULL,
-    FOREIGN KEY (id_seccion) REFERENCES secciones(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    INDEX(id_seccion)
+CREATE TABLE students(
+    id VARCHAR(12) PRIMARY KEY,
+    name VARCHAR(20) NOT NULL,
+    lastnames VARCHAR(100) NOT NULL,
+    id_section VARCHAR(10) NOT NULL,
+    FOREIGN KEY (id_section) REFERENCES sections(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    INDEX(id_section)
 );
 
-CREATE TABLE tiempos(
+CREATE TABLE food_times(
     id bigint PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    nombre VARCHAR(20) NOT NULL,
-    descripcion VARCHAR(100) NOT NULL
+    name VARCHAR(20) NOT NULL,
+    description VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE comidas(
+CREATE TABLE foods(
     id bigint PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    ced_alumno VARCHAR(12) NOT NULL,
-    fecha DATE NOT NULL,
-    id_tiempo bigint NOT NULL,
-    FOREIGN KEY (ced_alumno) REFERENCES alumnos(cedula) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (id_tiempo) REFERENCES tiempos(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    INDEX(ced_alumno,fecha),
-    INDEX(id_tiempo)
+    id_student VARCHAR(12) NOT NULL,
+    food_date DATE NOT NULL,
+    id_food_time bigint NOT NULL,
+    FOREIGN KEY (id_student) REFERENCES students(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (id_food_time) REFERENCES food_times(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    INDEX(id_student,food_date),
+    INDEX(id_food_time)
 );
 
 CREATE TABLE menus(
     id bigint PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    fecha DATE NOT NULL,
-    id_tiempo bigint NOT NULL,
-    encargado varchar(10) NOT NULL,
-    FOREIGN KEY (id_tiempo) REFERENCES tiempos(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (encargado) REFERENCES usuarios(username) ON UPDATE CASCADE ON DELETE CASCADE
+    day_served DATE NOT NULL,
+    id_food_time bigint NOT NULL,
+    creator varchar(100) NOT NULL,
+    FOREIGN KEY (id_food_time) REFERENCES food_times(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (creator) REFERENCES users(email) ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+insert into users values ("scot@estebanramirez.xyz",md5("muvpeq-5dikcU-beqgoz"),1,0);
