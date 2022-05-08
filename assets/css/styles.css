@@ -1,0 +1,26 @@
+.success-modal-container{
+    background: none !important;
+}
+.success-modal-header, .danger-modal-header{
+    border-bottom:none !important;
+}
+.success-modal, .danger-modal{
+    border: none !important;
+    height: 100% !important;
+}
+.success-modal{
+    background-color: #3aa123 !important;
+}
+.danger-modal{
+    background-color:#ed4b00 !important;
+}
+.success-modal-animation, .danger-modal-animation{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-button-confirm{
+    border-color: #fff !important;
+    color:#fff !important;
+}

@@ -3,16 +3,24 @@ require_once(__DIR__.'/../database/database.php');
 
 class User{
 
-    function __construct($email,$password, $name="",$isAdmin=null,$isSu=null){
+    public static $INSERT_REQUIRED_FIELDS = ["email","password","name"];
+    public static $UPDATE_REQUIRED_FIELDS = ["name"];
+
+    function __construct($email,$password=null, $name="",$isAdmin=null,$isSu=null){
         $this->email =$email;
-        $this->password =md5($password);
+        $this->password = $password;
         $this->name=$name;
         $this->isSu=$isSu;
         $this->isAdmin=$isAdmin;
         $this->connection = null;
     }
 
+    function encryptPassword(){
+        $this->password = md5($this->password);
+    }
+
     function login(){
+        $this->encryptPassword();
         $query="SELECT * FROM users WHERE email='$this->email' AND password='$this->password'";
         $result = $this->connection->query($query);
         $wasSuccessfully = $result->num_rows>=1;
@@ -37,40 +45,69 @@ class User{
     }
 
     function save(){
+        $response = 500;
+        if(empty($this->email)) return $response;
         $this->isSu=0;
-        $this->name=preg_replace('/[^,;a-zA-Z0-9_-]/s', '', $this->name);
         $existingUser = User::getUser($this->connection,$this->email,false);
         if($existingUser){
+            if(empty($this->password)){
+                $this->password =$existingUser["password"];
+            }else{
+                $this->encryptPassword();
+            }
             $fieldsSentence="";
             $fieldMap = "";
             $fields = [];
             $fieldsToCompare = [
-                "name"=>[$this->name,$existingUser->name,"s"],
-                "password"=>[$this->password,$existingUser->password,"s"],
-                "is_admin"=>[$this->isAdmin,$existingUser->isAdmin,"i"]
+                "name"=>[$this->name,$existingUser['name'],"s"],
+                "password"=>[$this->password,$existingUser['password'],"s"],
+                "is_admin"=>[$this->isAdmin,$existingUser['is_admin'],"i"]
             ];
             foreach ($fieldsToCompare as $key => $value) {
                 if($value[0]!=$value[1]){
-                    $fields+=(($fieldsSentence=="")?"$key=?":", $key=?");
+                    $fieldsSentence=$fieldsSentence.(($fieldsSentence=="")?"$key=?":", $key=?");
                     $fields []=$value[0];
-                    $fieldMap+=$value[2];
+                    $fieldMap=$fieldMap.$value[2];
                 }
             }
-            if($fields == ""){
-                return true;
+            if(count($fields) == 0){
+                $response = 205;
             }else{
                 $this->isAdmin=(int)((bool)$this->isAdmin);
-                $statement = $this->connection->prepare("UPDATE users SET ".$fields."WHERE users=$this->email");
-                $statement.bind_param($fieldMap,...$fields);
+                $statement = $this->connection->prepare("UPDATE users SET ".$fieldsSentence." WHERE email=?");
+                $fields = [...$fields,$this->email];
+                $fieldMap = $fieldMap."s";
+                $statement->bind_param($fieldMap, ...$fields);
+                $response = 200;
             }
         }else{
+            if(empty($this->password)){
+                $response=400;
+                 return $response;
+            }
             $this->isAdmin=1;
             $statement = $this->connection->prepare("INSERT INTO users VALUES (?, ?, ?, ?, ?)");
             $statement->bind_param('sssii',$this->email,$this->password,$this->name,$this->isSu,$this->isAdmin);
+            $response = 201;
+
         }
-        if($statement)
+        
+        if(isset($statement)){
             $statement->execute();
-        return $statement;
+            if(!$statement) $response = 500;
+        }    
+        return $response;
+    }
+
+    public static function removeUser($connection,$email){
+        $respose=500;
+        $statement = $connection->prepare("DELETE FROM users WHERE email=?");
+        $statement->bind_param('s',$email);
+        if(isset($statement)){
+            $statement->execute();
+            if($statement) $response=204;
+        }
+        return $response;
     }
 
     public static function getAllUsers($connection){

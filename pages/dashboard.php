@@ -14,8 +14,8 @@
 -->
 <?php
 session_start();
-if(!$_SESSION['verification']){
-  header("Location: / index.php");
+if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper'])){
+  header("Location: /index.php");
 }
 ?>
 <!DOCTYPE html>
@@ -95,6 +95,7 @@ if(!$_SESSION['verification']){
         </li>
         
         <?php if(isset($_SESSION['isSuper'])) : ?>
+          <?php if($_SESSION['isSuper']) : ?>
           <li class="nav-item">
             <a class="nav-link  " href="../pages/users-admin.php">
               <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -135,6 +136,7 @@ if(!$_SESSION['verification']){
               <span class="nav-link-text ms-1">Administrar Usuarios</span>
             </a>
           </li>
+        <?php endif; ?>
         <?php endif; ?>
 
         <li class="nav-item">

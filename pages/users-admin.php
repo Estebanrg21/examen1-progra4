@@ -21,22 +21,65 @@ if(!$_SESSION['verification']){
 }
 require_once(__DIR__."/../models/User.php");
 require_once(__DIR__."/../database/database.php");
+require_once(__DIR__."/../util.php");
 [$db,$connection] = Database::getConnection();
-
-if(isset($_POST['email']) && isset($_POST['password']) && isset($_POST['isAdmin']) ){
-  $user = new User($_POST['email'],$_POST['password'],$_POST['name'],$_POST['isAdmin']);
-  #if($user->save($connection))
-    
+$classModal = "";
+if(areSubmitted(User::$INSERT_REQUIRED_FIELDS ) || areSubmitted(User::$UPDATE_REQUIRED_FIELDS )){
+  if (checkInput(User::$INSERT_REQUIRED_FIELDS) || checkInput(User::$UPDATE_REQUIRED_FIELDS)) {
+    $user = new User(
+        $_POST['email'],
+        (isset($_POST['password'])?$_POST['password']:null),
+        (isset($_POST['name'])?$_POST['name']:null),
+        (isset($_POST['isAdmin'])?$_POST['isAdmin']:null),
+      );
+    $user->connection = $connection;
+    $result = $user->save($connection);
+    if($result == 500 || $result == 400){
+      if($result==500)
+        $errorMessage = "Hubo un error en el servidor";
+      if($result==400)
+        $errorMessage = "Campos en formato erróneo";
+      $popErrorModal = true;
+      $classModal = "danger";
+    }
+    if($result == 200 || $result == 201 || $result == 204 ){
+      if($result==200)
+        $successMessage = "Usuario actualizado correctamente!";
+      if($result==201)
+        $successMessage = "Usuario creado correctamente!";
+      if($result==205)
+        $successMessage = "El usuario no necesita actualizarse";
+      $popSuccessModal =true;  
+      $classModal = "success";
+    }   
+  }else{
+    $errorSubmission = "Los campos no pueden estar vacíos";
+  }
+  
 }
 
-if (isset($_GET['id'])) {
-  $user = User::getUser($connection,$_GET['id'],false);
+if (isset($_GET['id']) && isset($_GET['m'])) {
+  $user = User::getUser($connection,$_GET['id'],$_GET['m']=='d');
   if($user){
-    $email = $user['email'];
-    $name =  $user['name'];
-    $isAdmin = $user['is_admin'];
-    $formText = "Actualizar usuario";
-    $formButtonText = "Actualizar";
+    if($_GET['m']!='d'){
+      $email = $user['email'];
+      $name =  $user['name'];
+      $isAdmin = $user['is_admin'];
+      $formText = "Actualizar usuario";
+      $formButtonText = "Actualizar";
+    }else{
+      $result = User::removeUser($connection,$_GET['id']);
+      if($result = 204){
+        $successMessage = "Usuario Eliminado correctamente";
+        $popSuccessModal =true;  
+        $classModal = "success";
+      }else{
+        if($result==500)
+          $errorMessage = "Hubo un error en el servidor";
+        $popErrorModal = true;
+        $classModal = "danger";
+      }
+    }
   }
 }
 ?>
@@ -55,6 +98,7 @@ if (isset($_GET['id'])) {
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
   <!-- Nucleo Icons -->
   <link href="../assets/css/nucleo-icons.css" rel="stylesheet" />
+  <link href="../assets/css/styles.css" rel="stylesheet" />
   <link href="../assets/css/nucleo-svg.css" rel="stylesheet" />
   <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
@@ -64,7 +108,29 @@ if (isset($_GET['id'])) {
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
-  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main">
+  <?php if(isset($popSuccessModal) || isset($popErrorModal)) : ?>
+    <script>
+      window.history.replaceState({}, document.title, `${window.location.pathname}`);
+    </script>
+    <div class="modal fade <?php echo $classModal?>-modal-container" id="<?php echo $classModal?>Modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="<?php echo $classModal?>ModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
+        <div class="px-3  modal-content <?php echo $classModal?>-modal d-flex flex-column justify-content-around"" >
+          <div class="<?php echo $classModal?>-modal-animation">
+            <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+            <?php if(isset($popSuccessModal)): ?>
+              <lottie-player src="https://assets10.lottiefiles.com/packages/lf20_bkizmjpn.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"    autoplay></lottie-player>
+            <?php else : ?>
+              <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_46u4ucum.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"  autoplay></lottie-player>
+            <?php endif; ?>
+          </div>
+          <h3 class="mt-4 text-center text-white text-break"> <?php echo (isset($popSuccessModal)?$successMessage:$errorMessage) ?></h3>
+          
+          <button type="button" data-bs-dismiss="modal" class="btn btn-outline-<?php echo $classModal?> w-50 center align-self-center modal-button-confirm">Entendido!</button>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
+  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main" style="z-index:99">
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
       <a class="navbar-brand m-0" href="/pages/dashboard.php">
@@ -273,6 +339,9 @@ if (isset($_GET['id'])) {
             </div>
             <div class="card-body p-3">
               <form role="form" method="POST" action="#" id="formUser">
+              <?php if(isset($errorSubmission)) : ?>
+                <p class="text-danger text-xs font-weight-bolder mb-3" id="errorMessageUserForm"><?php echo $errorSubmission;?></p>
+              <?php endif; ?>
                 <div class="mb-3">
                     <h6 class="text-uppercase text-body text-xs font-weight-bolder">Email</h6>
                       <div>
@@ -291,25 +360,36 @@ if (isset($_GET['id'])) {
                       <input type="password" class="form-control" name="password" id="formUserPassword" placeholder="Password" aria-label="Password" aria-describedby="password-addon">
                     </div>
                 </div>
+                <?php
+                  if(isset($isAdmin)){
+                    echo "
+                    <div class=\"border-0 px-0\" id=\"formUserCheckBox\">
+                      <div class=\"form-check form-switch ps-0\">
+                        <input type=\"hidden\" name=\"isAdmin\">
+                        <input class=\"form-check-input ms-auto\" type=\"checkbox\"  id=\"isAdmin\"".(($isAdmin)?"checked":"").">
+                        <label class=\"form-check-label text-body ms-3 text-truncate w-80 mb-0\" for=\"flexSwitchCheckDefault\">Usuario Administrativo</label>
+                      </div>
+                    </div>
 
-                <div class="border-0 px-0">
-                  <div class="form-check form-switch ps-0">
-                    <input type="hidden" name="isAdmin">
-                    <input class="form-check-input ms-auto" type="checkbox"  id="isAdmin" <?php echo (isset($isAdmin)?"checked":"")  ?>>
-                    <label class="form-check-label text-body ms-3 text-truncate w-80 mb-0" for="flexSwitchCheckDefault">Usuario Administrativo</label>
-                  </div>
-                </div>
-                <script>
-                  let checkbox =document.getElementById("isAdmin");
-                  let checkboxHidden = document.getElementsByName("isAdmin")[0];
-                  checkboxHidden.value=(checkbox.checked)?1:0;
-                  checkbox.addEventListener("change",(e)=>{
-                      checkboxHidden.value=(e.target.checked)?1:0;
-                  })
-                </script>
+                    <script>
+                    let checkbox =document.getElementById(\"isAdmin\");
+                    if (checkbox) {
+                      let checkboxHidden = document.getElementsByName(\"isAdmin\")[0];
+                      checkboxHidden.value=(checkbox.checked)?1:0;
+                      checkbox.addEventListener(\"change\",(e)=>{
+                          checkboxHidden.value=(e.target.checked)?1:0;
+                      })  
+                    }
+                    </script>
+
+                    ";
+                  }
+                
+                ?>
+                
 
                 <div class="text-center">
-                  <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0"><?php echo (isset($formButtonText)?$formButtonText:"Crear")?></button>
+                  <button type="submit" id="formUserButton" class="btn bg-gradient-info w-100 mt-4 mb-0"><?php echo (isset($formButtonText)?$formButtonText:"Crear")?></button>
                 </div>
               </form>
             </div>
@@ -349,7 +429,7 @@ if (isset($_GET['id'])) {
                               
                               <td class=\"align-middle text-center text-sm\">
                                 <input type=\"hidden\"  value=\"".$row['name']."\" user-name />
-                                <p class=\"text-xs font-weight-bold mb-0\"".$row["name"]."</p>
+                                <p class=\"text-xs font-weight-bold mb-0\">".$row["name"]."</p>
                               </td>
                               
                               <td class=\"align-middle text-center text-sm\">
@@ -364,41 +444,43 @@ if (isset($_GET['id'])) {
                             if(!$row["is_su"]){
                               echo "<td><div class=\"d-flex justify-content-center align-items-center\">";
                               echo "
-                                <form action=\"#\" method=\"get\">
+                                <form action=\"#\" method=\"get\" class=\"m-0 p-0\">
                                   <input type=\"hidden\" value=\"".$row['email']."\" name=\"id\" />
+                                  <input type=\"hidden\" value=\"u\" name=\"m\" />
                                   <button type=\"submit\" class=\"btn btn-link text-dark px-3 mb-0 edit-user\" >
                                     <i class=\"fas fa-pencil-alt text-dark me-2\" aria-hidden=\"true\"></i>Actualizar
                                   </button>
                                 </form>
                                 ";  
                               echo "
-                                <button class=\"btn btn-link text-danger px-3 mb-0 delete-user\">
-                                  <i class=\"far fa-trash-alt me-2\" aria-hidden=\"true\"></i>Eliminar
-                                </button>";
+                                <form action=\"#\" method=\"get\" class=\"m-0 p-0\">
+                                  <input type=\"hidden\" value=\"".$row['email']."\" name=\"id\" />
+                                  <input type=\"hidden\" value=\"d\" name=\"m\" />
+                                  <button class=\"btn btn-link text-danger px-3 mb-0 \" delete-user>
+                                    <i class=\"far fa-trash-alt me-2\" aria-hidden=\"true\"></i>Eliminar
+                                  </button>
+                                </form>
+                                ";
                               echo "</div></td>";
                             }
                         }
                       }
                     ?>
+                    <script>
+                      let deleteUserButtons = Array.prototype.slice.call(document.querySelectorAll('button[delete-user]'));
+                      if(deleteUserButtons){
+                        deleteUserButtons.forEach((element)=>{
+                          element.addEventListener('click',(e)=>{
+                            e.preventDefault();
+                            if(confirm('¿Desea eliminar el usuario?')){
+                              e.target.form.submit();
+                            }
+                          })
+                        });
+                      }
+                    </script>
                   </tbody>
                 </table>
-                <script>
-                      let editUserButtons = Array.prototype.slice.call(document.getElementsByClassName("edit-user"));
-                      editUserButtons.forEach(element => {
-                          element.addEventListener("click",(e)=>{
-                              let row = element.parentNode.parentNode.parentNode;
-                              user ={
-                                email:row.querySelector('input[user-email]').value,
-                                name:row.querySelector('input[user-name]').value,
-                                isAdmin:row.querySelector('input[is-admin]').value,
-                              }
-                              document.getElementsByName("email")[0].value=user.email;
-                              document.getElementsByName("name")[0].value=user.email;
-                              document.getElementsByName("email")[0].value=user.email;
-                              document.getElementsByName("email")[0].value=user.email;
-                          });
-                      });
-                </script>
               </div>
             </div>
           </div>
@@ -442,10 +524,25 @@ if (isset($_GET['id'])) {
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="../assets/js/soft-ui-dashboard.min.js?v=1.0.5"></script>
   <script>
-    document.getElementById("clearUserForm").addEvenetListener((e)=>{
-
+    document.getElementById("clearUserForm").addEventListener("click",(e)=>{
+        window.history.replaceState({}, document.title, `${window.location.pathname}`);
+        document.getElementById("formUserTitle").textContent = "Crear usuario";
+        document.getElementById("formUserEmail").value = "";
+        document.getElementById("formUserName").value = "";
+        document.getElementById("formUserPassword").value = "";
+        document.getElementById("formUserButton").textContent = "Crear";
+        let formMsg = document.getElementById("errorMessageUserForm");
+        if(formMsg)formMsg.remove();
+        let checkbox = document.getElementById("formUserCheckBox");
+        if(checkbox)checkbox.remove();
     });
   </script>
+  <?php if(isset($popSuccessModal) || isset($popErrorModal)) : ?>
+      <script type="text/javascript">
+         let modal = new bootstrap.Modal(document.getElementById('<?php echo $classModal?>Modal'));
+         modal.show();
+    </script>
+  <?php endif; ?>
 </body>
 
 </html>
