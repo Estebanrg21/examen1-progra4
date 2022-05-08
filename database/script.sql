@@ -11,6 +11,7 @@ GRANT ALL PRIVILEGES ON scot.* TO 'comidaAdmin'@'localhost';
 CREATE TABLE users(
     email varchar(100) NOT NULL,
     password varchar(50) NOT NULL,
+    name varchar(100) NOT NULL,
     is_su TINYINT NOT NULL,
     is_admin TINYINT NOT NULL,
     PRIMARY KEY (email)
@@ -43,8 +44,7 @@ CREATE TABLE foods(
     id_food_time bigint NOT NULL,
     FOREIGN KEY (id_student) REFERENCES students(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (id_food_time) REFERENCES food_times(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    INDEX(id_student,food_date),
-    INDEX(id_food_time)
+    INDEX(id_student,food_date,id_food_time)
 );
 
 CREATE TABLE menus(
@@ -56,4 +56,4 @@ CREATE TABLE menus(
     FOREIGN KEY (creator) REFERENCES users(email) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-insert into users values ("scot@estebanramirez.xyz",md5("muvpeq-5dikcU-beqgoz"),1,0);
+insert into users values ("scot@estebanramirez.xyz",md5("muvpeq-5dikcU-beqgoz"),"Super usuario",1,0);

@@ -18,6 +18,12 @@ class Database
         $this->db = $db ?? $db_name;
     }
 
+    public static function getConnection(){
+        $db = new Database();
+        $connection = $db->connect();
+        return [$db,$connection];
+    }
+
     function connect()
     {
         return (new mysqli(

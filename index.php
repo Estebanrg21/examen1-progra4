@@ -12,9 +12,8 @@ session_start();
 </head>
 <body>
     <?php
-        $currentPath="".dirname($_SERVER['REQUEST_URI']);
-        $login =  $currentPath."/login.php";
-        $dashboard =  $currentPath."/dashboard.php";
+        $login = "/login.php";
+        $dashboard = "pages/dashboard.php";
         $mainLink = (!isset($_SESSION['verification']))?$login:$dashboard;
         $linkText = (!isset($_SESSION['verification']))?"Login":"Panel de control";
     ?>

@@ -1,9 +1,8 @@
 <?php
 session_start();
-if($_SESSION['verification']){
+if(isset($_SESSION['verification'])){
     header("Location: index.php");
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -27,8 +26,10 @@ if($_SESSION['verification']){
             if($user->login()){
                 session_start();
                 $_SESSION['user']=$user->email;
+                $_SESSION['isSuper'] = $user->is_su;
+                $_SESSION['isAdmin'] = $user->is_admin;
                 $_SESSION['verification']=true;
-                header("Location: dashboard.php");
+                header("Location: /pages/dashboard.php");
             }else{
                 echo "No login";
             }
