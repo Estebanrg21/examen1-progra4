@@ -28,6 +28,17 @@ if(isset($_POST['email']) && isset($_POST['password']) && isset($_POST['isAdmin'
   #if($user->save($connection))
     
 }
+
+if (isset($_GET['id'])) {
+  $user = User::getUser($connection,$_GET['id'],false);
+  if($user){
+    $email = $user['email'];
+    $name =  $user['name'];
+    $isAdmin = $user['is_admin'];
+    $formText = "Actualizar usuario";
+    $formButtonText = "Actualizar";
+  }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -236,7 +247,15 @@ if(isset($_POST['email']) && isset($_POST['password']) && isset($_POST['isAdmin'
                 <span class="d-sm-inline d-none"><?php echo (isset($_SESSION['user'])?$_SESSION['user']:"")?></span>
               </a>
             </li>
-            
+            <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
+              <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
+                <div class="sidenav-toggler-inner">
+                  <i class="sidenav-toggler-line"></i>
+                  <i class="sidenav-toggler-line"></i>
+                  <i class="sidenav-toggler-line"></i>
+                </div>
+              </a>
+            </li>
             
           </ul>
         </div>
@@ -248,34 +267,35 @@ if(isset($_POST['email']) && isset($_POST['password']) && isset($_POST['isAdmin'
       <!-- Form -->
       <div class="col-12 col-xl-4">
           <div class="card h-100">
-            <div class="card-header pb-0 p-3">
-              <h6 class="mb-0">Crear usuario</h6>
+            <div class="card-header pb-0 p-3 border-0 d-flex align-items-center">
+              <h6 class="mb-0" id="formUserTitle"><?php echo (isset($formText)?$formText:"Crear usuario")?></h6>
+              <p class="btn btn-link pe-3 ps-0 mb-0 ms-auto" id="clearUserForm">Limpiar</p>
             </div>
             <div class="card-body p-3">
               <form role="form" method="POST" action="#" id="formUser">
                 <div class="mb-3">
                     <h6 class="text-uppercase text-body text-xs font-weight-bolder">Email</h6>
                       <div>
-                        <input type="email" class="form-control" placeholder="Email" name="email" aria-label="Email" aria-describedby="email-addon">
+                        <input type="email" class="form-control" id="formUserEmail" placeholder="Email" name="email" aria-label="Email" aria-describedby="email-addon" value="<?php echo (isset($email)?$email:"")  ?>">
                       </div>
                 </div>
                 <div class="mb-3">
                     <h6 class="text-uppercase text-body text-xs font-weight-bolder">Nombre</h6>
                       <div>
-                        <input type="text" class="form-control" placeholder="Nombre" name="email" aria-label="Nombre" aria-describedby="text-addon">
+                        <input type="text" class="form-control" id="formUserName" placeholder="Nombre" name="name" aria-label="Nombre" aria-describedby="text-addon" value="<?php echo (isset($name)?$name:"")  ?>">
                       </div>
                 </div>
                 <div class="mb-3">
                     <h6 class="text-uppercase text-body text-xs font-weight-bolder">Contraseña</h6>
                     <div>
-                      <input type="password" class="form-control" name="password" placeholder="Password" aria-label="Password" aria-describedby="password-addon">
+                      <input type="password" class="form-control" name="password" id="formUserPassword" placeholder="Password" aria-label="Password" aria-describedby="password-addon">
                     </div>
                 </div>
 
                 <div class="border-0 px-0">
                   <div class="form-check form-switch ps-0">
                     <input type="hidden" name="isAdmin">
-                    <input class="form-check-input ms-auto" type="checkbox"  id="isAdmin">
+                    <input class="form-check-input ms-auto" type="checkbox"  id="isAdmin" <?php echo (isset($isAdmin)?"checked":"")  ?>>
                     <label class="form-check-label text-body ms-3 text-truncate w-80 mb-0" for="flexSwitchCheckDefault">Usuario Administrativo</label>
                   </div>
                 </div>
@@ -289,7 +309,7 @@ if(isset($_POST['email']) && isset($_POST['password']) && isset($_POST['isAdmin'
                 </script>
 
                 <div class="text-center">
-                  <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">Crear</button>
+                  <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0"><?php echo (isset($formButtonText)?$formButtonText:"Crear")?></button>
                 </div>
               </form>
             </div>
@@ -344,11 +364,15 @@ if(isset($_POST['email']) && isset($_POST['password']) && isset($_POST['isAdmin'
                             if(!$row["is_su"]){
                               echo "<td><div class=\"d-flex justify-content-center align-items-center\">";
                               echo "
-                                <button class=\"btn btn-link text-dark px-3 mb-0 edit-user\" >
-                                  <i class=\"fas fa-pencil-alt text-dark me-2\" aria-hidden=\"true\"></i>Actualizar
-                                </button>";  
+                                <form action=\"#\" method=\"get\">
+                                  <input type=\"hidden\" value=\"".$row['email']."\" name=\"id\" />
+                                  <button type=\"submit\" class=\"btn btn-link text-dark px-3 mb-0 edit-user\" >
+                                    <i class=\"fas fa-pencil-alt text-dark me-2\" aria-hidden=\"true\"></i>Actualizar
+                                  </button>
+                                </form>
+                                ";  
                               echo "
-                                <button class=\"btn btn-link text-danger text-gradient px-3 mb-0 delete-user\">
+                                <button class=\"btn btn-link text-danger px-3 mb-0 delete-user\">
                                   <i class=\"far fa-trash-alt me-2\" aria-hidden=\"true\"></i>Eliminar
                                 </button>";
                               echo "</div></td>";
@@ -417,6 +441,11 @@ if(isset($_POST['email']) && isset($_POST['password']) && isset($_POST['isAdmin'
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="../assets/js/soft-ui-dashboard.min.js?v=1.0.5"></script>
+  <script>
+    document.getElementById("clearUserForm").addEvenetListener((e)=>{
+
+    });
+  </script>
 </body>
 
 </html>

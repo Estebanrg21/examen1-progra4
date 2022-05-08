@@ -1,5 +1,5 @@
 <?php
-require(__DIR__.'/../database/database.php');
+require_once(__DIR__.'/../database/database.php');
 
 class User{
 
@@ -9,7 +9,7 @@ class User{
         $this->name=$name;
         $this->isSu=$isSu;
         $this->isAdmin=$isAdmin;
-        $this->$connection = null;
+        $this->connection = null;
     }
 
     function login(){
@@ -27,8 +27,9 @@ class User{
     
 
     public static function getUser($connection,$userEmail,$onlyCheckExistance=true){
-        $statement = $this->connection->prepare("SELECT".(($onlyCheckExistance)?"email":"*")." WHERE email=?");
+        $statement = $connection->prepare("SELECT ".(($onlyCheckExistance)?"email":"*")." FROM users WHERE email=?");
         $statement->bind_param('s',$userEmail);
+        $statement->execute();
         if($statement)
             $result = $statement->get_result();
             return (($onlyCheckExistance)?$result->num_rows>=1:$result->fetch_array(MYSQLI_ASSOC));

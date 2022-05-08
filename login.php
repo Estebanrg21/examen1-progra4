@@ -20,14 +20,17 @@ if(isset($_SESSION['verification'])){
 		<input type="submit" value="Ingresar">
 	</form>
 	<?php
+        require_once "database/database.php";
         require_once "models/User.php";
+        [$db,$connection] = Database::getConnection();
 		if(isset($_POST['email']) && isset($_POST['password'])){
 			$user = new User($_POST['email'],$_POST['password']);
+            $user->connection = $connection;
             if($user->login()){
                 session_start();
                 $_SESSION['user']=$user->email;
-                $_SESSION['isSuper'] = $user->is_su;
-                $_SESSION['isAdmin'] = $user->is_admin;
+                $_SESSION['isSuper'] = $user->isSu;
+                $_SESSION['isAdmin'] = $user->isAdmin;
                 $_SESSION['verification']=true;
                 header("Location: /pages/dashboard.php");
             }else{
