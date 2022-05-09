@@ -17,6 +17,11 @@ session_start();
 if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper'])){
   header("Location: /index.php");
 }
+require_once(__DIR__."/../models/FoodTime.php");
+require_once(__DIR__."/../database/database.php");
+[$db,$connection] = Database::getConnection();
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -323,12 +328,44 @@ if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']
           <div class="card h-100 p-3">
             <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100" style="background-image: url('../assets/img/illustrations/pizza.svg');background-position: center;">
               <span class="mask " style="background-image: linear-gradient(to right top, #bc5900, #d07300, #e28e00, #f2aa00, #ffc700);"></span>
-              <div class="card-body position-relative z-index-1 d-flex flex-column justify-content-center align-items-center h-100 ">
-                <h1 class="text-white font-weight-bolder mb-4 pt-2">Validar Estudiantes!</h1>
+              <div class="card-body position-relative z-index-1 d-flex flex-column h-100 ">
+                <h5 class="text-white font-weight-bolder mb-4 pt-2">Validar Estudiantes!</h5>
+                <?php if(isset($searchInfo)) : ?>
+                  <p class="text-info text-xs font-weight-bolder mb-3" id="infoMessageSearch"><?php echo $searchInfo;?></p>
+                <?php endif; ?>
+              <?php if(isset($searchError)) : ?>
+                <p class="text-danger text-xs font-weight-bolder mb-3" id="errorMessageSearch"><?php echo $searchError;?></p>
+              <?php endif; ?>
+              <form action="#" method="get">
+              <div class="align-self-center  d-flex flex-wrap">
+                <div class="input-group flex-md-fill mb-5" style="z-index:99;"> 
+                    <select class="form-select" name="foodTime" aria-label="Default select example">
+                      <option selected>Tiempo de comida</option>
+                      <?php
+
+                        $foodTimes = FoodTime::getAllFoodTimes($connection);
+                        if($foodTimes){
+                          while($row = $foodTimes->fetch_array(MYSQLI_ASSOC)){
+                            echo "<option  value=\"".$row["id"]."\">".$row["name"]."</option>";
+                          }
+                        }
+
+                      ?>
+                  </select>
+                </div>
+                <div class="input-group flex-md-fill" style="z-index:99;">
+                  <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
+                  <input type="text" class="form-control" name="id" placeholder="Cédula de estudiante">
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn bg-gradient-dark w-100 my-4 mb-2">Buscar</button>
+                  </div>
+              </div>
+              </form>
               </div>
             </div>
           </div>
-        </div>  
+      </div>  
         <div class="col-lg-7 mb-lg-0 mb-4">
           <div class="">
             <div class="card-body p-3">
