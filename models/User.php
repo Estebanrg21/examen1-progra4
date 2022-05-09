@@ -85,6 +85,7 @@ class User{
                 $response=400;
                  return $response;
             }
+            $this->encryptPassword();
             $this->isAdmin=1;
             $statement = $this->connection->prepare("INSERT INTO users VALUES (?, ?, ?, ?, ?)");
             $statement->bind_param('sssii',$this->email,$this->password,$this->name,$this->isSu,$this->isAdmin);

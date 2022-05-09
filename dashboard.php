@@ -12,11 +12,22 @@
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 -->
+
 <?php
 session_start();
 if(!$_SESSION['verification'] ){
   header("Location: /index.php");
 }
+
+$now = time();
+
+if($now > $_SESSION['expire']) {
+  session_destroy();
+  session_start();
+  $_SESSION['wasRedirected']=true;
+  header("Location: /session-expired.php");
+}
+
 require_once(__DIR__."/models/FoodTime.php");
 require_once(__DIR__."/models/Food.php");
 require_once(__DIR__."/database/database.php");

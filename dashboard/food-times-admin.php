@@ -19,6 +19,17 @@ if(!$_SESSION['verification']){
 }else if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper'])){
   header("Location: /dashboard.php");
 }
+
+$now = time();
+
+if($now > $_SESSION['expire']) {
+  session_destroy();
+  session_start();
+  $_SESSION['wasRedirected']=true;
+  header("Location: /session-expired.php");
+}
+
+
 require_once(__DIR__."/../models/FoodTime.php");
 require_once(__DIR__."/../database/database.php");
 require_once(__DIR__."/../util.php");

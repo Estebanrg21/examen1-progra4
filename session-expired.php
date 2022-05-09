@@ -1,43 +1,12 @@
 <?php
-    session_start();
-    if(isset($_SESSION['verification'])){
-        header("Location: dashboard.php");
-    }
-    require_once "database/database.php";
-    require_once "models/User.php";
-    [$db,$connection] = Database::getConnection();
-		if(isset($_POST['email']) && isset($_POST['password'])){
-			$user = new User($_POST['email'],$_POST['password']);
-            $user->connection = $connection;
-            if($user->login()){
-                session_start();
-                $_SESSION['user']=$user->email;
-                $_SESSION['isSuper'] = $user->isSu;
-                $_SESSION['isAdmin'] = $user->isAdmin;
-                $_SESSION['verification']=true;
-                $_SESSION['start'] = time();
-                $_SESSION['expire'] = $_SESSION['start'] + (15 * 60);
-                header("Location: /dashboard.php");
-            }else{
-                $loginError="Datos incorrectos";
-            }
-		}
-	?>
+session_start();
+if(!isset($_SESSION['wasRedirected']))
+    header("Location: /index.php");
+else
+    session_destroy();
+?>
 
-<!--
-=========================================================
-* Soft UI Dashboard - v1.0.5
-=========================================================
 
-* Product Page: https://www.creative-tim.com/product/soft-ui-dashboard
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://www.creative-tim.com/license)
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
--->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -74,29 +43,8 @@
         <div class="container">
           <div class="row">
             <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
-              <div class="card card-plain mt-8">
-                <div class="card-header pb-0 text-left bg-transparent">
-                  <h3 class="font-weight-bolder text-info text-gradient">Login</h3>
-                </div>
-                <div class="card-body">
-                  <form role="form" action="#" method="POST">
-                  <?php if(isset($loginError)) : ?>
-                    <p class="text-danger text-xs font-weight-bolder p-0 mb-3" id="errorMessageValidate"><?php echo $loginError;?></p>
-                  <?php endif; ?>
-                    <label>Email</label>
-                    <div class="mb-3">
-                      <input type="email" name="email" class="form-control" placeholder="Email" aria-label="Email" aria-describedby="email-addon">
-                    </div>
-                    <label>Contraseña</label>
-                    <div class="mb-3">
-                      <input type="password" name="password" class="form-control" placeholder="Contraseña" aria-label="Password" aria-describedby="password-addon">
-                    </div>
-                    <div class="text-center">
-                      <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">Iniciar sesión</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
+              <h1>Sesión expirada!</h1>
+              <a href="/login.php">Iniciar sesión</a>
             </div>
             <div class="col-md-6">
               <div class="oblique position-absolute top-0 h-100 d-md-block d-none me-n8">
