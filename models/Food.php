@@ -1,7 +1,8 @@
 <?php
 require_once(__DIR__.'/../database/database.php');
 require_once(__DIR__."/../util.php");
-require_once(__DIR__."/Section.php");
+require_once(__DIR__."/FoodTime.php");
+require_once(__DIR__."/Student.php");
 class Food{
 
     public static $MAX_LENGTH_OF_FIELD = ["student"=>12];
@@ -15,12 +16,14 @@ class Food{
 
 
     function canStudentExchange(){
-        $statement = $this->connection->prepare("SELECT id FROM foods WHERE id_student=? AND food_date=? AND id_food_time=?");
-        $statement->bind_param('sss',$this->student,$this->foodDate,$this->foodTime);
-        $statement->execute();
-        if($statement)
-            $result = $statement->get_result();
-            return !($result->num_rows>=1);
+        if(Student::getStudent($this->connection,$this->student) && FoodTime::getFoodTime($this->connection,$this->foodTime)){
+            $statement = $this->connection->prepare("SELECT id FROM foods WHERE id_student=? AND food_date=? AND id_food_time=?");
+            $statement->bind_param('sss',$this->student,$this->foodDate,$this->foodTime);
+            $statement->execute();
+            if($statement)
+                $result = $statement->get_result();
+                return !($result->num_rows>=1);
+        }
         throw new Exception("Consulta de estado de estudiante no ejecutada");
         
     }
