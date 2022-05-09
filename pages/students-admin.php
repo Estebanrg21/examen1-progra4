@@ -14,8 +14,86 @@
 -->
 <?php
 session_start();
-if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper'])){
+if(!$_SESSION['verification']){
   header("Location: /index.php");
+}else if(!$_SESSION['isSuper']){
+  header("Location: /index.php");
+}
+require_once(__DIR__."/../models/Student.php");
+require_once(__DIR__."/../database/database.php");
+require_once(__DIR__."/../util.php");
+[$db,$connection] = Database::getConnection();
+$classModal = "";
+if(areSubmitted(Student::$INSERT_REQUIRED_FIELDS ) ){
+  if (checkInput(Student::$INSERT_REQUIRED_FIELDS) ) {
+  
+    $student = new Student(
+      $_POST['id'],
+      (isset($_POST['name'])?$_POST['name']:null),
+      (isset($_POST['lastNames'])?$_POST['lastNames']:null),
+      (isset($_POST['sectionId'])?$_POST['sectionId']:null),
+      
+    );
+    $student->connection = $connection;
+    $result = $student->save();
+    if($result == 500 || $result == 400 || $result==404 || $result==403){
+      if($result==500)
+        $errorMessage = "Hubo un error en el servidor";
+      if($result==400)
+        $errorMessage = "Campos en formato erróneo";
+      if($result==403)
+        $errorMessage = "Sección no existe";
+      if($result==404)
+        $errorMessage = "Estudiante no existe";
+      $popErrorModal = true;
+      $classModal = "danger";
+    }
+    if($result == 200 || $result == 201 || $result == 205 ){
+      if($result==200)
+        $successMessage = "Estudiante actualizado correctamente!";
+      if($result==201)
+        $successMessage = "Estudiante creado correctamente!";
+      if($result==205)
+        $successMessage = "Estudiante no necesita actualizarse";
+      $popSuccessModal =true;  
+      $classModal = "success";
+    }   
+  }else{
+    $errorSubmission = "Los campos no pueden estar vacíos";
+  }
+  
+}
+if (isset($_GET['id']) && isset($_GET['m'])) {
+  if(empty($_GET['id'])){
+    $searchError="Campo no puede estar en blanco";
+  }else{
+    $student = Student::getStudent($connection,$_GET['id'],$_GET['m']=='d');
+    if($student){
+      if($_GET['m']!='d'){
+        $id = $student['id'];
+        $blockIdInput =true;
+        $name=$student['name'];
+        $lastNames=$student['lastnames'];
+        $idSection = $student['id_section'];
+        $formText = "Actualizar estudiante";
+        $formButtonText = "Actualizar";
+      }else{
+        $result = Student::removeStudent($connection,$_GET['id']);
+        if($result = 204){
+          $successMessage = "Estudiante eliminado correctamente";
+          $popSuccessModal =true;  
+          $classModal = "success";
+        }else{
+          if($result==500)
+            $errorMessage = "Hubo un error en el servidor";
+          $popErrorModal = true;
+          $classModal = "danger";
+        }
+      }
+    }else{
+      $searchInfo = "Estudiante no encontrado";
+    }
+  }
 }
 ?>
 <!DOCTYPE html>
@@ -27,12 +105,13 @@ if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/favicon.png">
   <title>
-  SCOT: Panel de control
+  SCOT: Administración de estudiantes
   </title>
   <!--     Fonts and icons     -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
   <!-- Nucleo Icons -->
   <link href="../assets/css/nucleo-icons.css" rel="stylesheet" />
+  <link href="../assets/css/styles.css" rel="stylesheet" />
   <link href="../assets/css/nucleo-svg.css" rel="stylesheet" />
   <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
@@ -42,6 +121,29 @@ if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
+  <?php if(isset($popSuccessModal) || isset($popErrorModal)) : ?>
+    <script>
+      window.history.replaceState({}, document.title, `${window.location.pathname}`);
+    </script>
+    <div class="modal fade <?php echo $classModal?>-modal-container" id="<?php echo $classModal?>Modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="<?php echo $classModal?>ModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down position-relative">
+        <div class="px-3  modal-content <?php echo $classModal?>-modal d-flex flex-column justify-content-around" >
+        <button type="button" class="btn-close position-absolute top-2 m-0 p-0 end-4" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="<?php echo $classModal?>-modal-animation">
+            <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+            <?php if(isset($popSuccessModal)): ?>
+              <lottie-player src="https://assets10.lottiefiles.com/packages/lf20_bkizmjpn.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"    autoplay></lottie-player>
+            <?php else : ?>
+              <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_46u4ucum.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"  autoplay></lottie-player>
+            <?php endif; ?>
+          </div>
+          <h3 class="mt-4 text-center text-white text-break"> <?php echo (isset($popSuccessModal)?$successMessage:$errorMessage) ?></h3>
+          
+          <button type="button" data-bs-dismiss="modal" class="btn btn-outline-<?php echo $classModal?> w-50 center align-self-center modal-button-confirm">Entendido!</button>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
   <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main" style="z-index:99;">
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
@@ -54,7 +156,7 @@ if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']
     
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link active" href="/pages/dashboard.php">
+          <a class="nav-link" href="/pages/dashboard.php">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>shop </title>
@@ -208,7 +310,7 @@ if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']
         </li>
 
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/students-admin.php">
+          <a class="nav-link active " href="../pages/students-admin.php">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
               width="14px" height="14px" viewBox="0 0 29.254 29.254" style="enable-background:new 0 0 29.254 29.254;"
@@ -288,7 +390,7 @@ if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']
     <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" navbar-scroll="true">
       <div class="container-fluid py-1 px-3">
         <nav aria-label="breadcrumb">
-          <h6 class="font-weight-bolder mb-0">Panel de control</h6>
+          <h6 class="font-weight-bolder mb-0">Administración de estudiantes</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
@@ -310,7 +412,6 @@ if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']
                 </div>
               </a>
             </li>
-
             
           </ul>
         </div>
@@ -319,72 +420,119 @@ if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']
     <!-- End Navbar -->
     <div class="container-fluid py-4">
       <div class="row mt-4">
-      <div class="col-lg-5" style="cursor:pointer;">
-          <div class="card h-100 p-3">
-            <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100" style="background-image: url('../assets/img/illustrations/pizza.svg');background-position: center;">
-              <span class="mask " style="background-image: linear-gradient(to right top, #bc5900, #d07300, #e28e00, #f2aa00, #ffc700);"></span>
-              <div class="card-body position-relative z-index-1 d-flex flex-column justify-content-center align-items-center h-100 ">
-                <h1 class="text-white font-weight-bolder mb-4 pt-2">Validar Estudiantes!</h1>
-              </div>
-            </div>
-          </div>
-        </div>  
-        <div class="col-lg-7 mb-lg-0 mb-4">
-          <div class="">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="col-lg-6">
-                  <div class="d-flex flex-column h-100">
-                    <h2 class="font-weight-bolder">Sistema de Control de Tiempos de Comida </h2>
-                    <p class="mb-2">
-                      Bienvenida(o) al panel de control donde podrá hacer las siguietes operaciones:
-                    </p>
-                    <h6>Estudiantes</h6>
-                    <ul class="mb-2">
-                      <li>
-                      Agregar
-                      </li>
-                      <li>
-                      Actualizar
-                      </li>
-                      <li>
-                      Eliminar
-                      </li>
-                      <li>Validar estudiante</li>
-                    </ul>
-                    <?php  
-                      if(isset($_SESSION['isSuper'])){
-                        if($_SESSION['isSuper']){
-                          echo "Además, podrá agregar nuevos usuarios administradores del sistema.";
-                        }
+      <!-- Form -->
+      <div class="col-12 col-xl-4">
+          <div class="card h-100">
+            <div class="card-header pb-0 p-3 border-0 d-flex align-items-center">
+              <h6 class="mb-0" id="mainFormTitle"><?php echo (isset($formText)?$formText:"Crear estudiante")?></h6>
+              <?php if(isset($id)) : ?>
+                <form action="" method="get" class="ms-auto" id="formDelete">
+                <input type="hidden" value="<?php echo $id;?>" name="id" />
+                  <input type="hidden" value="d" name="m" />
+                  <button class="btn btn-link text-danger px-3 mb-0 ms-auto" delete-item>
+                    <i class="far fa-trash-alt me-2" aria-hidden="true"></i>Eliminar
+                  </button>
+                </form>
+                <script>
+                      let deleteButton = document.querySelector('button[delete-item]');
+                      if(deleteButton){
+                        deleteButton.addEventListener('click',(e)=>{
+                            e.preventDefault();
+                            if(confirm('¿Desea eliminar la sección?')){
+                              e.target.form.submit();
+                            }
+                        });
                       }
-                      ?>
-                  </div>
+                </script>
+              <?php endif; ?>
+              <p class="btn btn-link pe-3 ps-0 mb-0 ms-auto" id="clearMainForm">Limpiar</p>
+            </div>
+            
+            <div class="card-body p-3">
+              <form role="form" method="POST" action="#" id="mainForm">
+                <?php if(isset($errorSubmission)) : ?>
+                  <p class="text-danger text-xs font-weight-bolder mb-3" id="errorMessageMainForm"><?php echo $errorSubmission;?></p>
+                <?php endif; ?>
+
+                <div class="mb-3" id="mainField">
+                  <h6 class="text-uppercase text-body text-xs font-weight-bolder">Cédula de estudiante</h6>
+                    <div>
+                      <input type="hidden" name="id" value="<?php echo (isset($id)?$id:$_POST['id'])  ?>">
+                      <input type="text" name="id" placeholder="Cédula" class="form-control" id="formId" aria-label="id" aria-describedby="food-time-addon" value="<?php echo (isset($id)?$id:((isset($_POST['id']))?$_POST['id']:""))?>" <?php echo (isset($blockIdInput)?"disabled":"")  ?>>
+                    </div>
                 </div>
 
-              </div>
+                <div class="mb-3">
+                    <h6 class="text-uppercase text-body text-xs font-weight-bolder">Nombre</h6>
+                      <div>
+                        <input type="text" class="form-control" id="mainFormName" placeholder="Nombre" name="name" aria-label="Nombre" aria-describedby="text-addon" value="<?php echo (isset($name)?$name:((isset($_POST['name']))?$_POST['name']:""))?>">
+                      </div>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-uppercase text-body text-xs font-weight-bolder">Apellidos</h6>
+                      <div>
+                        <input type="text" class="form-control" id="mainFormLastNames" placeholder="Apellidos" name="lastNames" aria-label="Apellidos" aria-describedby="text-addon" value="<?php echo (isset($lastNames)?$lastNames:((isset($_POST['lastNames']))?$_POST['lastNames']:""))?>">
+                      </div>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-uppercase text-body text-xs font-weight-bolder">Sección</h6>
+                      <div>
+                        <input type="text" class="form-control" id="mainFormSectionId" placeholder="Sección" name="sectionId" aria-label="Sección" aria-describedby="text-addon" value="<?php echo (isset($idSection)?$idSection:((isset($_POST['sectionId']))?$_POST['sectionId']:""))?>">
+                      </div>
+                </div>
+                <div class="text-center">
+                  <button type="submit" id="mainFormButton" class="btn bg-gradient-info w-100 mt-4 mb-0"><?php echo (isset($formButtonText)?$formButtonText:"Crear")?></button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
-                 
-      </div>
-     
-      
-      <footer class="footer pt-3  ">
-        <div class="container-fluid">
-          <div class="row align-items-center justify-content-lg-between">
-            <div class="col-lg-6 mb-lg-0 mb-4">
-              <div class="copyright text-center text-sm text-muted text-lg-start">
-                © <script>
-                  document.write(new Date().getFullYear())
-                </script>,
-                made with <i class="fa fa-heart"></i> by
-                <a href="https://estebanramirez.xyz" class="font-weight-bold" target="_blank">Esteban Ramírez</a>
+      <!-- End Form -->
+      <!-- Search Student -->
+      <div class="col-12 col-xl-4">
+          <div class="card  d-flex">
+            <div class="card-header pb-0 p-3">
+              <h6 class="mb-0">Buscar estudiante</h6>
+            </div>
+            <div class="card-body p-3">
+              <?php if(isset($searchInfo)) : ?>
+                  <p class="text-info text-xs font-weight-bolder mb-3" id="infoMessageSearch"><?php echo $searchInfo;?></p>
+                <?php endif; ?>
+              <?php if(isset($searchError)) : ?>
+                <p class="text-danger text-xs font-weight-bolder mb-3" id="errorMessageSearch"><?php echo $searchError;?></p>
+              <?php endif; ?>
+              <form action="#" method="get">
+              <div class="align-self-center  d-flex flex-wrap">
+                <div class="input-group flex-md-fill" style="z-index:99;">
+                  <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
+                  <input type="text" class="form-control" name="id" placeholder="Cédula de estudiante">
+                </div>
+                <input type="hidden" value="b" name="m" />
+                <div class="text-center">
+                    <button type="submit" class="btn bg-gradient-dark w-100 my-4 mb-2">Buscar</button>
+                  </div>
               </div>
+              </form>
             </div>
           </div>
         </div>
-      </footer>
+        <!-- Search Student -->
+
+        <footer class="footer pt-3  ">
+          <div class="container-fluid">
+            <div class="row align-items-center justify-content-lg-between">
+              <div class="col-lg-6 mb-lg-0 mb-4">
+                <div class="copyright text-center text-sm text-muted text-lg-start">
+                  © <script>
+                    document.write(new Date().getFullYear())
+                  </script>,
+                  made with <i class="fa fa-heart"></i> by
+                  <a href="https://estebanramirez.xyz" class="font-weight-bold" target="_blank">Esteban Ramírez</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </footer>
     </div>
   </main>
   <!--   Core JS Files   -->
@@ -406,6 +554,29 @@ if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="../assets/js/soft-ui-dashboard.min.js?v=1.0.5"></script>
+  <script>
+    document.getElementById("clearMainForm").addEventListener("click",(e)=>{
+        window.history.replaceState({}, document.title, `${window.location.pathname}`);
+        document.getElementById("mainFormTitle").textContent = "Crear estudiante";
+        let mainField = document.getElementById("formId");
+        mainField.value="";
+        mainField.removeAttribute('disabled');
+        document.getElementById("mainFormName").value = "";
+        document.getElementById("mainFormLastNames").value = "";
+        document.getElementById("mainFormSectionId").value = "";
+        document.getElementById("mainFormButton").textContent = "Crear";
+        let formMsg = document.getElementById("errorMessageMainForm");
+        if(formMsg)formMsg.remove();
+        let deleteButton = document.getElementById('formDelete');
+        if(deleteButton)deleteButton.remove();
+    });
+  </script>
+  <?php if(isset($popSuccessModal) || isset($popErrorModal)) : ?>
+      <script type="text/javascript">
+         let modal = new bootstrap.Modal(document.getElementById('<?php echo $classModal?>Modal'));
+         modal.show();
+    </script>
+  <?php endif; ?>
 </body>
 
 </html>
