@@ -16,45 +16,38 @@
 session_start();
 if(!$_SESSION['verification']){
   header("Location: /index.php");
-}else if(!$_SESSION['isSuper']){
-  header("Location: /index.php");
+}else if(!$_SESSION['verification'] || (!$_SESSION['isAdmin'] && !$_SESSION['isSuper'])){
+  header("Location: /dashboard.php");
 }
-require_once(__DIR__."/../models/Student.php");
+require_once(__DIR__."/../models/FoodTime.php");
 require_once(__DIR__."/../database/database.php");
 require_once(__DIR__."/../util.php");
 [$db,$connection] = Database::getConnection();
 $classModal = "";
-if(areSubmitted(Student::$INSERT_REQUIRED_FIELDS ) ){
-  if (checkInput(Student::$INSERT_REQUIRED_FIELDS) ) {
-  
-    $student = new Student(
-      $_POST['id'],
+if(areSubmitted(FoodTime::$INSERT_REQUIRED_FIELDS ) ){
+  if (checkInput(FoodTime::$INSERT_REQUIRED_FIELDS) ) {
+    $foodTime = new FoodTime(
       (isset($_POST['name'])?$_POST['name']:null),
-      (isset($_POST['lastNames'])?$_POST['lastNames']:null),
-      (isset($_POST['sectionId'])?$_POST['sectionId']:null),
-      
+      (isset($_POST['description'])?$_POST['description']:null),
+      (isset($_POST['id'])?$_POST['id']:null)
     );
-    $student->connection = $connection;
-    $result = $student->save();
-    if($result == 500 || $result == 400 || $result==404 || $result==403){
+    $foodTime->connection = $connection;
+    $result = $foodTime->save();
+    if($result == 500 || $result == 400){
       if($result==500)
         $errorMessage = "Hubo un error en el servidor";
       if($result==400)
         $errorMessage = "Campos en formato erróneo";
-      if($result==403)
-        $errorMessage = "Sección no existe";
-      if($result==404)
-        $errorMessage = "Estudiante no existe";
       $popErrorModal = true;
       $classModal = "danger";
     }
     if($result == 200 || $result == 201 || $result == 205 ){
       if($result==200)
-        $successMessage = "Estudiante actualizado correctamente!";
+        $successMessage = "Tiempo de comida actualizado correctamente!";
       if($result==201)
-        $successMessage = "Estudiante creado correctamente!";
+        $successMessage = "Tiempo de comida creado correctamente!";
       if($result==205)
-        $successMessage = "Estudiante no necesita actualizarse";
+        $successMessage = "Tiempo de comida no necesita actualizarse";
       $popSuccessModal =true;  
       $classModal = "success";
     }   
@@ -63,35 +56,29 @@ if(areSubmitted(Student::$INSERT_REQUIRED_FIELDS ) ){
   }
   
 }
+
 if (isset($_GET['id']) && isset($_GET['m'])) {
-  if(empty($_GET['id'])){
-    $searchError="Campo no puede estar en blanco";
-  }else{
-    $student = Student::getStudent($connection,$_GET['id'],$_GET['m']=='d');
-    if($student){
-      if($_GET['m']!='d'){
-        $id = $student['id'];
-        $blockIdInput =true;
-        $name=$student['name'];
-        $lastNames=$student['lastnames'];
-        $idSection = $student['id_section'];
-        $formText = "Actualizar estudiante";
-        $formButtonText = "Actualizar";
-      }else{
-        $result = Student::removeStudent($connection,$_GET['id']);
-        if($result = 204){
-          $successMessage = "Estudiante eliminado correctamente";
-          $popSuccessModal =true;  
-          $classModal = "success";
-        }else{
-          if($result==500)
-            $errorMessage = "Hubo un error en el servidor";
-          $popErrorModal = true;
-          $classModal = "danger";
-        }
-      }
+  $foodTime = FoodTime::getFoodTime($connection,$_GET['id'],$_GET['m']=='d');
+  if($foodTime){
+    if($_GET['m']!='d'){
+      $id = $foodTime['id'];
+      $blockIdInput =true;
+      $name=$foodTime['name'];
+      $description =  $foodTime['description'];
+      $formText = "Actualizar tiempo de comida";
+      $formButtonText = "Actualizar";
     }else{
-      $searchInfo = "Estudiante no encontrado";
+      $result = FoodTime::removeFoodTime($connection,$_GET['id']);
+      if($result = 204){
+        $successMessage = "Tiempo de comida eliminado correctamente";
+        $popSuccessModal =true;  
+        $classModal = "success";
+      }else{
+        if($result==500)
+          $errorMessage = "Hubo un error en el servidor";
+        $popErrorModal = true;
+        $classModal = "danger";
+      }
     }
   }
 }
@@ -105,7 +92,7 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/favicon.png">
   <title>
-  SCOT: Administración de estudiantes
+  SCOT: Administración de tiempos
   </title>
   <!--     Fonts and icons     -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
@@ -156,7 +143,7 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
     
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link" href="/pages/dashboard.php">
+          <a class="nav-link" href="/dashboard.php">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>shop </title>
@@ -180,7 +167,7 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
         <?php if(isset($_SESSION['isSuper'])) : ?>
           <?php if($_SESSION['isSuper']) : ?>
             <li class="nav-item">
-              <a class="nav-link  " href="../pages/users-admin.php">
+              <a class="nav-link  " href="../dashboard/users-admin.php">
                 <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 60 60" style="enable-background:new 0 0 60 60;" xml:space="preserve" width="12px" height="12px">
                   <path d="M55.014,45.389l-9.553-4.776C44.56,40.162,44,39.256,44,38.248v-3.381c0.229-0.28,0.47-0.599,0.719-0.951  c1.239-1.75,2.232-3.698,2.954-5.799C49.084,27.47,50,26.075,50,24.5v-4c0-0.963-0.36-1.896-1-2.625v-5.319  c0.056-0.55,0.276-3.824-2.092-6.525C44.854,3.688,41.521,2.5,37,2.5s-7.854,1.188-9.908,3.53c-1.435,1.637-1.918,3.481-2.064,4.805  C23.314,9.949,21.294,9.5,19,9.5c-10.389,0-10.994,8.855-11,9v4.579c-0.648,0.706-1,1.521-1,2.33v3.454  c0,1.079,0.483,2.085,1.311,2.765c0.825,3.11,2.854,5.46,3.644,6.285v2.743c0,0.787-0.428,1.509-1.171,1.915l-6.653,4.173  C1.583,48.134,0,50.801,0,53.703V57.5h14h2h44v-4.043C60,50.019,58.089,46.927,55.014,45.389z M14,53.262V55.5H2v-1.797  c0-2.17,1.184-4.164,3.141-5.233l6.652-4.173c1.333-0.727,2.161-2.121,2.161-3.641v-3.591l-0.318-0.297  c-0.026-0.024-2.683-2.534-3.468-5.955l-0.091-0.396l-0.342-0.22C9.275,29.899,9,29.4,9,28.863v-3.454  c0-0.36,0.245-0.788,0.671-1.174L10,23.938l-0.002-5.38C10.016,18.271,10.537,11.5,19,11.5c2.393,0,4.408,0.553,6,1.644v4.731  c-0.64,0.729-1,1.662-1,2.625v4c0,0.304,0.035,0.603,0.101,0.893c0.027,0.116,0.081,0.222,0.118,0.334  c0.055,0.168,0.099,0.341,0.176,0.5c0.001,0.002,0.002,0.003,0.003,0.005c0.256,0.528,0.629,1,1.099,1.377  c0.005,0.019,0.011,0.036,0.016,0.054c0.06,0.229,0.123,0.457,0.191,0.68l0.081,0.261c0.014,0.046,0.031,0.093,0.046,0.139  c0.035,0.108,0.069,0.215,0.105,0.321c0.06,0.175,0.123,0.356,0.196,0.553c0.031,0.082,0.065,0.156,0.097,0.237  c0.082,0.209,0.164,0.411,0.25,0.611c0.021,0.048,0.039,0.1,0.06,0.147l0.056,0.126c0.026,0.058,0.053,0.11,0.079,0.167  c0.098,0.214,0.194,0.421,0.294,0.621c0.016,0.032,0.031,0.067,0.047,0.099c0.063,0.125,0.126,0.243,0.189,0.363  c0.108,0.206,0.214,0.4,0.32,0.588c0.052,0.092,0.103,0.182,0.154,0.269c0.144,0.246,0.281,0.472,0.414,0.682  c0.029,0.045,0.057,0.092,0.085,0.135c0.242,0.375,0.452,0.679,0.626,0.916c0.046,0.063,0.086,0.117,0.125,0.17  c0.022,0.029,0.052,0.071,0.071,0.097v3.309c0,0.968-0.528,1.856-1.377,2.32l-2.646,1.443l-0.461-0.041l-0.188,0.395l-5.626,3.069  C15.801,46.924,14,49.958,14,53.262z M58,55.5H16v-2.238c0-2.571,1.402-4.934,3.659-6.164l8.921-4.866  C30.073,41.417,31,39.854,31,38.155v-4.018v-0.001l-0.194-0.232l-0.038-0.045c-0.002-0.003-0.064-0.078-0.165-0.21  c-0.006-0.008-0.012-0.016-0.019-0.024c-0.053-0.069-0.115-0.152-0.186-0.251c-0.001-0.002-0.002-0.003-0.003-0.005  c-0.149-0.207-0.336-0.476-0.544-0.8c-0.005-0.007-0.009-0.015-0.014-0.022c-0.098-0.153-0.202-0.32-0.308-0.497  c-0.008-0.013-0.016-0.026-0.024-0.04c-0.226-0.379-0.466-0.808-0.705-1.283c0,0-0.001-0.001-0.001-0.002  c-0.127-0.255-0.254-0.523-0.378-0.802l0,0c-0.017-0.039-0.035-0.077-0.052-0.116h0c-0.055-0.125-0.11-0.256-0.166-0.391  c-0.02-0.049-0.04-0.1-0.06-0.15c-0.052-0.131-0.105-0.263-0.161-0.414c-0.102-0.272-0.198-0.556-0.29-0.849l-0.055-0.178  c-0.006-0.02-0.013-0.04-0.019-0.061c-0.094-0.316-0.184-0.639-0.26-0.971l-0.091-0.396l-0.341-0.22  C26.346,25.803,26,25.176,26,24.5v-4c0-0.561,0.238-1.084,0.67-1.475L27,18.728V12.5v-0.354l-0.027-0.021  c-0.034-0.722,0.009-2.935,1.623-4.776C30.253,5.458,33.081,4.5,37,4.5c3.905,0,6.727,0.951,8.386,2.828  c1.947,2.201,1.625,5.017,1.623,5.041L47,18.728l0.33,0.298C47.762,19.416,48,19.939,48,20.5v4c0,0.873-0.572,1.637-1.422,1.899  l-0.498,0.153l-0.16,0.495c-0.669,2.081-1.622,4.003-2.834,5.713c-0.297,0.421-0.586,0.794-0.837,1.079L42,34.123v4.125  c0,1.77,0.983,3.361,2.566,4.153l9.553,4.776C56.513,48.374,58,50.78,58,53.457V55.5z"/>
@@ -196,7 +183,7 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
         <?php endif; ?>
           
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/sections-admin.php">
+          <a class="nav-link  " href="../dashboard/sections-admin.php">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg  width="14px" height="14px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
                 <g>
@@ -231,7 +218,7 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
         </li>
 
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/food-times-admin.php">
+          <a class="nav-link  active" href="../dashboard/food-times-admin.php">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
             <svg width="14px" height="14px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 600.801 600.801" style="enable-background:new 0 0 600.801 600.801;" xml:space="preserve">
                 <g>
@@ -310,7 +297,7 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
         </li>
 
         <li class="nav-item">
-          <a class="nav-link active " href="../pages/students-admin.php">
+          <a class="nav-link " href="../dashboard/students-admin.php">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
               width="14px" height="14px" viewBox="0 0 29.254 29.254" style="enable-background:new 0 0 29.254 29.254;"
@@ -339,7 +326,7 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Account pages</h6>
         </li>
         <li class="nav-item">
-          <a class="nav-link  " href="../pages/profile.html">
+          <a class="nav-link  " href="../dashboard/profile.html">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>customer-support</title>
@@ -390,7 +377,7 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
     <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" navbar-scroll="true">
       <div class="container-fluid py-1 px-3">
         <nav aria-label="breadcrumb">
-          <h6 class="font-weight-bolder mb-0">Administración de estudiantes</h6>
+          <h6 class="font-weight-bolder mb-0">Administración de tiempos</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
@@ -424,60 +411,35 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
       <div class="col-12 col-xl-4">
           <div class="card h-100">
             <div class="card-header pb-0 p-3 border-0 d-flex align-items-center">
-              <h6 class="mb-0" id="mainFormTitle"><?php echo (isset($formText)?$formText:"Crear estudiante")?></h6>
-              <?php if(isset($id)) : ?>
-                <form action="" method="get" class="ms-auto" id="formDelete">
-                <input type="hidden" value="<?php echo $id;?>" name="id" />
-                  <input type="hidden" value="d" name="m" />
-                  <button class="btn btn-link text-danger px-3 mb-0 ms-auto" delete-item>
-                    <i class="far fa-trash-alt me-2" aria-hidden="true"></i>Eliminar
-                  </button>
-                </form>
-                <script>
-                      let deleteButton = document.querySelector('button[delete-item]');
-                      if(deleteButton){
-                        deleteButton.addEventListener('click',(e)=>{
-                            e.preventDefault();
-                            if(confirm('¿Desea eliminar la sección?')){
-                              e.target.form.submit();
-                            }
-                        });
-                      }
-                </script>
-              <?php endif; ?>
+              <h6 class="mb-0" id="mainFormTitle"><?php echo (isset($formText)?$formText:"Crear tiempo de comida")?></h6>
               <p class="btn btn-link pe-3 ps-0 mb-0 ms-auto" id="clearMainForm">Limpiar</p>
             </div>
-            
             <div class="card-body p-3">
               <form role="form" method="POST" action="#" id="mainForm">
                 <?php if(isset($errorSubmission)) : ?>
                   <p class="text-danger text-xs font-weight-bolder mb-3" id="errorMessageMainForm"><?php echo $errorSubmission;?></p>
                 <?php endif; ?>
 
-                <div class="mb-3" id="mainField">
-                  <h6 class="text-uppercase text-body text-xs font-weight-bolder">Cédula de estudiante</h6>
-                    <div>
-                      <input type="hidden" name="id" value="<?php echo (isset($id)?$id:$_POST['id'])  ?>">
-                      <input type="text" name="id" placeholder="Cédula" class="form-control" id="formId" aria-label="id" aria-describedby="food-time-addon" value="<?php echo (isset($id)?$id:((isset($_POST['id']))?$_POST['id']:""))?>" <?php echo (isset($blockIdInput)?"disabled":"")  ?>>
-                    </div>
+                <?php if(isset($blockIdInput)) : ?>
+                  <div class="mb-3" id="mainField">
+                    <h6 class="text-uppercase text-body text-xs font-weight-bolder">Identificador de tiempo</h6>
+                      <div>
+                        <input type="hidden" name="id" value="<?php echo (isset($id)?$id:"")  ?>">
+                        <input type="text" class="form-control" id="formId" aria-label="id" aria-describedby="food-time-addon" value="<?php echo (isset($id)?$id:"")  ?>" <?php echo (isset($blockIdInput)?"disabled":"")  ?>>
+                      </div>
                 </div>
+                <?php endif; ?>
 
                 <div class="mb-3">
                     <h6 class="text-uppercase text-body text-xs font-weight-bolder">Nombre</h6>
                       <div>
-                        <input type="text" class="form-control" id="mainFormName" placeholder="Nombre" name="name" aria-label="Nombre" aria-describedby="text-addon" value="<?php echo (isset($name)?$name:((isset($_POST['name']))?$_POST['name']:""))?>">
+                        <input type="text" class="form-control" id="mainFormName" placeholder="Nombre" name="name" aria-label="Nombre" aria-describedby="text-addon" value="<?php echo (isset($name)?$name:"")  ?>">
                       </div>
                 </div>
                 <div class="mb-3">
-                    <h6 class="text-uppercase text-body text-xs font-weight-bolder">Apellidos</h6>
+                    <h6 class="text-uppercase text-body text-xs font-weight-bolder">Descripción</h6>
                       <div>
-                        <input type="text" class="form-control" id="mainFormLastNames" placeholder="Apellidos" name="lastNames" aria-label="Apellidos" aria-describedby="text-addon" value="<?php echo (isset($lastNames)?$lastNames:((isset($_POST['lastNames']))?$_POST['lastNames']:""))?>">
-                      </div>
-                </div>
-                <div class="mb-3">
-                    <h6 class="text-uppercase text-body text-xs font-weight-bolder">Sección</h6>
-                      <div>
-                        <input type="text" class="form-control" id="mainFormSectionId" placeholder="Sección" name="sectionId" aria-label="Sección" aria-describedby="text-addon" value="<?php echo (isset($idSection)?$idSection:((isset($_POST['sectionId']))?$_POST['sectionId']:""))?>">
+                        <textarea class="form-control" id="formDescription" name="description" rows="3"><?php echo (isset($description)?$description:"")  ?></textarea>
                       </div>
                 </div>
                 <div class="text-center">
@@ -488,36 +450,90 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
           </div>
         </div>
       <!-- End Form -->
-      <!-- Search Student -->
-          <div class="col-12 col-xl-4 mt-4 mt-lg-0">
-            <div class="card  d-flex">
-              <div class="card-header pb-0 p-3">
-                <h6 class="mb-0">Buscar estudiante</h6>
-              </div>
-              <div class="card-body p-3">
-                <?php if(isset($searchInfo)) : ?>
-                    <p class="text-info text-xs font-weight-bolder mb-3" id="infoMessageSearch"><?php echo $searchInfo;?></p>
-                  <?php endif; ?>
-                <?php if(isset($searchError)) : ?>
-                  <p class="text-danger text-xs font-weight-bolder mb-3" id="errorMessageSearch"><?php echo $searchError;?></p>
-                <?php endif; ?>
-                <form action="#" method="get">
-                <div class="align-self-center  d-flex flex-wrap">
-                  <div class="input-group flex-md-fill" style="z-index:99;">
-                    <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
-                    <input type="text" class="form-control" name="id" placeholder="Cédula de estudiante">
-                  </div>
-                  <input type="hidden" value="b" name="m" />
-                  <div class="text-center">
-                      <button type="submit" class="btn bg-gradient-dark w-100 my-4 mb-2">Buscar</button>
-                    </div>
-                </div>
-                </form>
+      <!-- Show Food Times -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card mb-4">
+            <div class="card-header pb-0">
+              <h6>Tiempos de comida</h6>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Identificador</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 ">Nombre</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 ">Descripción</th>                    
+                      <th class="text-secondary opacity-7"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                      $foodTimes = FoodTime::getAllFoodTimes($connection);
+                      if($foodTimes){
+                        while($row = $foodTimes->fetch_array(MYSQLI_ASSOC)){
+                          echo "
+                            <tr>
+                              <td class=\"align-middle text-center text-sm\">
+                                <input type=\"hidden\" value=\"".$row['id']."\" food-time-id />
+                                <p class=\"text-xs font-weight-bold mb-0 \">".$row["id"]."</p>
+                              </td>
+                              
+                              <td class=\"align-middle text-center text-sm\">
+                                <input type=\"hidden\"  value=\"".$row['name']."\" food-time-name />
+                                <p class=\"text-xs font-weight-bold mb-0\">".$row["name"]."</p>
+                              </td>
+
+                              <td class=\"align-middle text-center text-sm text-wrap\">
+                                <input type=\"hidden\"  value=\"".$row['description']."\" food-time-description />
+                                <p class=\"text-xs font-weight-bold mb-0 text-wrap\">".$row["description"]."</p>
+                              </td>";
+                              echo "<td><div class=\"d-flex justify-content-center align-items-center\">";
+                              echo "
+                                <form action=\"#\" method=\"get\" class=\"m-0 p-0\">
+                                  <input type=\"hidden\" value=\"".$row['id']."\" name=\"id\" />
+                                  <input type=\"hidden\" value=\"u\" name=\"m\" />
+                                  <button type=\"submit\" class=\"btn btn-link text-dark px-3 mb-0 \" >
+                                    <i class=\"fas fa-pencil-alt text-dark me-2\" aria-hidden=\"true\"></i>Actualizar
+                                  </button>
+                                </form>
+                                ";  
+                              echo "
+                                <form action=\"#\" method=\"get\" class=\"m-0 p-0\">
+                                  <input type=\"hidden\" value=\"".$row['id']."\" name=\"id\" />
+                                  <input type=\"hidden\" value=\"d\" name=\"m\" />
+                                  <button class=\"btn btn-link text-danger px-3 mb-0 \" delete-item>
+                                    <i class=\"far fa-trash-alt me-2\" aria-hidden=\"true\"></i>Eliminar
+                                  </button>
+                                </form>
+                                ";
+                              echo "</div></td>";
+                            
+                        }
+                      }
+                    ?>
+                    <script>
+                      let deleteButtons = Array.prototype.slice.call(document.querySelectorAll('button[delete-item]'));
+                      if(deleteButtons){
+                        deleteButtons.forEach((element)=>{
+                          element.addEventListener('click',(e)=>{
+                            e.preventDefault();
+                            if(confirm('¿Desea eliminar el tiempo de comida?')){
+                              e.target.form.submit();
+                            }
+                          })
+                        });
+                      }
+                    </script>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
-        <!-- Search Student -->
-
+        </div>
+      </div>
+      <!-- End Show Food Times -->
         <footer class="footer pt-3  ">
           <div class="container-fluid">
             <div class="row align-items-center justify-content-lg-between">
@@ -557,18 +573,14 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
   <script>
     document.getElementById("clearMainForm").addEventListener("click",(e)=>{
         window.history.replaceState({}, document.title, `${window.location.pathname}`);
-        document.getElementById("mainFormTitle").textContent = "Crear estudiante";
-        let mainField = document.getElementById("formId");
-        mainField.value="";
-        mainField.removeAttribute('disabled');
+        document.getElementById("mainFormTitle").textContent = "Crear tiempo";
+        let mainField = document.getElementById("mainField");
+        if(mainField)mainField.remove();
         document.getElementById("mainFormName").value = "";
-        document.getElementById("mainFormLastNames").value = "";
-        document.getElementById("mainFormSectionId").value = "";
+        document.getElementById("formDescription").value = "";
         document.getElementById("mainFormButton").textContent = "Crear";
         let formMsg = document.getElementById("errorMessageMainForm");
         if(formMsg)formMsg.remove();
-        let deleteButton = document.getElementById('formDelete');
-        if(deleteButton)deleteButton.remove();
     });
   </script>
   <?php if(isset($popSuccessModal) || isset($popErrorModal)) : ?>
