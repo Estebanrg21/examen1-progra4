@@ -489,33 +489,33 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
         </div>
       <!-- End Form -->
       <!-- Search Student -->
-      <div class="col-12 col-xl-4">
-          <div class="card  d-flex">
-            <div class="card-header pb-0 p-3">
-              <h6 class="mb-0">Buscar estudiante</h6>
-            </div>
-            <div class="card-body p-3">
-              <?php if(isset($searchInfo)) : ?>
-                  <p class="text-info text-xs font-weight-bolder mb-3" id="infoMessageSearch"><?php echo $searchInfo;?></p>
-                <?php endif; ?>
-              <?php if(isset($searchError)) : ?>
-                <p class="text-danger text-xs font-weight-bolder mb-3" id="errorMessageSearch"><?php echo $searchError;?></p>
-              <?php endif; ?>
-              <form action="#" method="get">
-              <div class="align-self-center  d-flex flex-wrap">
-                <div class="input-group flex-md-fill" style="z-index:99;">
-                  <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
-                  <input type="text" class="form-control" name="id" placeholder="Cédula de estudiante">
-                </div>
-                <input type="hidden" value="b" name="m" />
-                <div class="text-center">
-                    <button type="submit" class="btn bg-gradient-dark w-100 my-4 mb-2">Buscar</button>
-                  </div>
+          <div class="col-12 col-xl-4 mt-4 mt-lg-0">
+            <div class="card  d-flex">
+              <div class="card-header pb-0 p-3">
+                <h6 class="mb-0">Buscar estudiante</h6>
               </div>
-              </form>
+              <div class="card-body p-3">
+                <?php if(isset($searchInfo)) : ?>
+                    <p class="text-info text-xs font-weight-bolder mb-3" id="infoMessageSearch"><?php echo $searchInfo;?></p>
+                  <?php endif; ?>
+                <?php if(isset($searchError)) : ?>
+                  <p class="text-danger text-xs font-weight-bolder mb-3" id="errorMessageSearch"><?php echo $searchError;?></p>
+                <?php endif; ?>
+                <form action="#" method="get">
+                <div class="align-self-center  d-flex flex-wrap">
+                  <div class="input-group flex-md-fill" style="z-index:99;">
+                    <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
+                    <input type="text" class="form-control" name="id" placeholder="Cédula de estudiante">
+                  </div>
+                  <input type="hidden" value="b" name="m" />
+                  <div class="text-center">
+                      <button type="submit" class="btn bg-gradient-dark w-100 my-4 mb-2">Buscar</button>
+                    </div>
+                </div>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
         <!-- Search Student -->
 
         <footer class="footer pt-3  ">

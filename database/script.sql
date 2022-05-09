@@ -52,6 +52,7 @@ CREATE TABLE menus(
     day_served DATE NOT NULL,
     id_food_time bigint NOT NULL,
     creator varchar(100) NOT NULL,
+    description varchar(100) NOT NULL, 
     FOREIGN KEY (id_food_time) REFERENCES food_times(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (creator) REFERENCES users(email) ON UPDATE CASCADE ON DELETE CASCADE
 );
