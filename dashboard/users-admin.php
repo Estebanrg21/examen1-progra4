@@ -13,22 +13,9 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 -->
 <?php
-session_start();
-if(!$_SESSION['verification']){
-  header("Location: /index.php");
-}else if(!$_SESSION['isSuper']){
-  header("Location: /dashboard.php");
-}
-
-$now = time();
-
-if($now > $_SESSION['expire']) {
-  session_destroy();
-  session_start();
-  $_SESSION['wasRedirected']=true;
-  header("Location: /session-expired.php");
-}
-
+$sessionCondition = (!$_SESSION['isSuper']);
+$headerLoc = "/dashboard.php";
+require_once(__DIR__."/../templates/sessionValidation.php");
 require_once(__DIR__."/../models/User.php");
 require_once(__DIR__."/../database/database.php");
 require_once(__DIR__."/../util.php");
@@ -99,28 +86,9 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
 <?php  $hdTitle="SCOT: Usuarios"; require_once(__DIR__ . '../../templates/header.php') ?>
 
 <body class="g-sidenav-show  bg-gray-100">
-  <?php if(isset($popSuccessModal) || isset($popErrorModal)) : ?>
-    <script>
-      window.history.replaceState({}, document.title, `${window.location.pathname}`);
-    </script>
-    <div class="modal fade <?php echo $classModal?>-modal-container" id="<?php echo $classModal?>Modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="<?php echo $classModal?>ModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
-        <div class="px-3  modal-content <?php echo $classModal?>-modal d-flex flex-column justify-content-around"" >
-          <div class="<?php echo $classModal?>-modal-animation">
-            <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-            <?php if(isset($popSuccessModal)): ?>
-              <lottie-player src="https://assets10.lottiefiles.com/packages/lf20_bkizmjpn.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"    autoplay></lottie-player>
-            <?php else : ?>
-              <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_46u4ucum.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"  autoplay></lottie-player>
-            <?php endif; ?>
-          </div>
-          <h3 class="mt-4 text-center text-white text-break"> <?php echo (isset($popSuccessModal)?$successMessage:$errorMessage) ?></h3>
-          
-          <button type="button" data-bs-dismiss="modal" class="btn btn-outline-<?php echo $classModal?> w-50 center align-self-center modal-button-confirm">Entendido!</button>
-        </div>
-      </div>
-    </div>
-  <?php endif; ?>
+  <!-- Modal -->
+  <?php require_once(__DIR__ . '../../templates/modal.php') ?>
+  <!-- End Modal -->
   <!-- Aside -->
     <?php  $option=1; require_once(__DIR__ . '../../templates/aside.php') ?>
   <!-- End Aside -->
@@ -304,25 +272,9 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
         </footer>
     </div>
   </main>
-  <!--   Core JS Files   -->
-  <script src="../assets/js/core/popper.min.js"></script>
-  <script src="../assets/js/core/bootstrap.min.js"></script>
-  <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
-  <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
-
-  <script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-      var options = {
-        damping: '0.5'
-      }
-      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-    }
-  </script>
-  <!-- Github buttons -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
-  <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
-  <script src="../assets/js/soft-ui-dashboard.min.js?v=1.0.5"></script>
+  <!-- Scripts -->
+  <?php  require_once(__DIR__ . '../../templates/scripts.php') ?>
+  <!-- End Scripts -->
   <script>
     document.getElementById("clearUserForm").addEventListener("click",(e)=>{
         window.history.replaceState({}, document.title, `${window.location.pathname}`);
@@ -337,12 +289,6 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
         if(checkbox)checkbox.remove();
     });
   </script>
-  <?php if(isset($popSuccessModal) || isset($popErrorModal)) : ?>
-      <script type="text/javascript">
-         let modal = new bootstrap.Modal(document.getElementById('<?php echo $classModal?>Modal'));
-         modal.show();
-    </script>
-  <?php endif; ?>
 </body>
 
 </html>

@@ -14,20 +14,7 @@
 -->
 
 <?php
-session_start();
-if(!$_SESSION['verification'] ){
-  header("Location: /index.php");
-}
-
-$now = time();
-
-if($now > $_SESSION['expire']) {
-  session_destroy();
-  session_start();
-  $_SESSION['wasRedirected']=true;
-  header("Location: /session-expired.php");
-}
-
+require_once(__DIR__."/templates/sessionValidation.php");
 require_once(__DIR__."/models/FoodTime.php");
 require_once(__DIR__."/models/Food.php");
 require_once(__DIR__."/database/database.php");
@@ -115,11 +102,11 @@ if (isset($_GET['id']) && isset($_GET['fId'])) {
         <div class="px-3  modal-content <?php echo $classModal?>-modal d-flex flex-column justify-content-around" >
         <button type="button" class="btn-close position-absolute top-2 m-0 p-0 end-4" data-bs-dismiss="modal" aria-label="Close"></button>
           <div class="<?php echo $classModal?>-modal-animation">
-            <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+            <script src="/assets/js/lottie-player.js"></script>
             <?php if(isset($popSuccessModal)): ?>
-              <lottie-player src="https://assets10.lottiefiles.com/packages/lf20_bkizmjpn.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"    autoplay></lottie-player>
+              <lottie-player src="/assets/lottie-animations/lf20_bkizmjpn.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"    autoplay></lottie-player>
             <?php else : ?>
-              <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_46u4ucum.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"  autoplay></lottie-player>
+              <lottie-player src="/assets/lottie-animations/lf20_46u4ucum.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"  autoplay></lottie-player>
             <?php endif; ?>
           </div>
           <h3 class="mt-4 text-center text-white text-break"> <?php echo (isset($popSuccessModal)?$successMessage:$errorMessage) ?></h3>
@@ -303,26 +290,9 @@ if (isset($_GET['id']) && isset($_GET['fId'])) {
       </footer>
     </div>
   </main>
-  <!--   Core JS Files   -->
-  <script src="../assets/js/core/popper.min.js"></script>
-  <script src="../assets/js/core/bootstrap.min.js"></script>
-  <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
-  <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
-
-  <script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-      var options = {
-        damping: '0.5'
-      }
-      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-    }
-  </script>
-  <!-- Github buttons -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
-  <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
-  <script src="../assets/js/soft-ui-dashboard.min.js?v=1.0.5"></script>
-
+<!-- Scripts -->
+<?php  require_once(__DIR__ . '/templates/scripts.php') ?>
+<!-- End Scripts -->
   <script>
      document.getElementById("clearValidate").addEventListener("click",(e)=>{
         window.history.replaceState({}, document.title, `${window.location.pathname}`);
@@ -340,13 +310,7 @@ if (isset($_GET['id']) && isset($_GET['fId'])) {
         if(errorDialog)errorDialog.remove();
     });
   </script>
-
-  <?php if(isset($popSuccessModal) || isset($popDangerModal)) : ?>
-      <script type="text/javascript">
-         let modal = new bootstrap.Modal(document.getElementById('<?php echo $classModal?>Modal'));
-         modal.show();
-    </script>
-  <?php endif; ?>
+  
 </body>
 
 </html>
