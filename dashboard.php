@@ -14,6 +14,7 @@
 -->
 
 <?php
+session_start();
 require_once(__DIR__."/templates/sessionValidation.php");
 require_once(__DIR__."/models/FoodTime.php");
 require_once(__DIR__."/models/Food.php");

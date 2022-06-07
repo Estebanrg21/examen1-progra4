@@ -16,7 +16,7 @@
                 $_SESSION['isAdmin'] = $user->isAdmin;
                 $_SESSION['verification']=true;
                 $_SESSION['start'] = time();
-                $_SESSION['expire'] = $_SESSION['start'] + (15 * 60);
+                $_SESSION['expire'] = $_SESSION['start'] + (60 * 60);
                 header("Location: /dashboard.php");
             }else{
                 $loginError="Datos incorrectos";

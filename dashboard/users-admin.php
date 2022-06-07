@@ -13,6 +13,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 -->
 <?php
+session_start();
 $sessionCondition = (!$_SESSION['isSuper']);
 $headerLoc = "/dashboard.php";
 require_once(__DIR__."/../templates/sessionValidation.php");

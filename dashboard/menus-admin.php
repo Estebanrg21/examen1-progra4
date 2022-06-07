@@ -17,72 +17,74 @@ session_start();
 $sessionCondition =  (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']);
 $headerLoc = "/dashboard.php";
 require_once(__DIR__."/../templates/sessionValidation.php");
-require_once(__DIR__ . "/../models/FoodTime.php");
+require_once(__DIR__ . "/../models/Menu.php");
 require_once(__DIR__ . "/../database/database.php");
 require_once(__DIR__ . "/../util.php");
 [$db, $connection] = Database::getConnection();
 $classModal = "";
-if (areSubmitted(FoodTime::$INSERT_REQUIRED_FIELDS)) {
-  if (checkInput(FoodTime::$INSERT_REQUIRED_FIELDS)) {
-    $foodTime = new FoodTime(
-      (isset($_POST['name']) ? $_POST['name'] : null),
-      (isset($_POST['description']) ? $_POST['description'] : null),
-      (isset($_POST['id']) ? $_POST['id'] : null)
-    );
-    $foodTime->connection = $connection;
-    $result = $foodTime->save();
-    if ($result == 500 || $result == 400) {
-      if ($result == 500)
-        $errorMessage = "Hubo un error en el servidor";
-      if ($result == 400)
-        $errorMessage = "Campos en formato erróneo";
-      $popErrorModal = true;
-      $classModal = "danger";
-    }
-    if ($result == 200 || $result == 201 || $result == 205) {
-      if ($result == 200)
-        $successMessage = "Tiempo de comida actualizado correctamente!";
-      if ($result == 201)
-        $successMessage = "Tiempo de comida creado correctamente!";
-      if ($result == 205)
-        $successMessage = "Tiempo de comida no necesita actualizarse";
-      $popSuccessModal = true;
-      $classModal = "success";
-    }
-  } else {
-    $errorSubmission = "Los campos no pueden estar vacíos";
-  }
-}
 
-if (isset($_GET['id']) && isset($_GET['m'])) {
-  $foodTime = FoodTime::getFoodTime($connection, $_GET['id'], $_GET['m'] == 'd');
-  if ($foodTime) {
-    if ($_GET['m'] != 'd') {
-      $id = $foodTime['id'];
-      $blockIdInput = true;
-      $name = $foodTime['name'];
-      $description =  $foodTime['description'];
-      $formText = "Actualizar tiempo de comida";
-      $formButtonText = "Actualizar";
-    } else {
-      $result = FoodTime::removeFoodTime($connection, $_GET['id']);
-      if ($result = 204) {
-        $successMessage = "Tiempo de comida eliminado correctamente";
-        $popSuccessModal = true;
-        $classModal = "success";
-      } else {
+
+if (areSubmitted(Menu::$INSERT_REQUIRED_FIELDS)) {
+    if (checkInput(Menu::$INSERT_REQUIRED_FIELDS)) {
+      $menu = new Menu(
+        (isset($_POST['name']) ? $_POST['name'] : null),
+        (isset($_POST['description']) ? $_POST['description'] : null),
+        (isset($_POST['id']) ? $_POST['id'] : null)
+      );
+      $menu->connection = $connection;
+      $result = $menu->save();
+      if ($result == 500 || $result == 400) {
         if ($result == 500)
           $errorMessage = "Hubo un error en el servidor";
+        if ($result == 400)
+          $errorMessage = "Campos en formato erróneo";
         $popErrorModal = true;
         $classModal = "danger";
       }
+      if ($result == 200 || $result == 201 || $result == 205) {
+        if ($result == 200)
+          $successMessage = "Comida actualizada correctamente!";
+        if ($result == 201)
+          $successMessage = "Comida creada correctamente!";
+        if ($result == 205)
+          $successMessage = "Comida no necesita actualizarse";
+        $popSuccessModal = true;
+        $classModal = "success";
+      }
+    } else {
+      $errorSubmission = "Los campos no pueden estar vacíos";
     }
   }
-}
+  
+  if (isset($_GET['id']) && isset($_GET['m'])) {
+    $menu = Menu::getMenu($connection, $_GET['id'], $_GET['m'] == 'd');
+    if ($menu) {
+      if ($_GET['m'] != 'd') {
+        $id = $menu['id'];
+        $blockIdInput = true;
+        $name = $menu['name'];
+        $description =  $menu['description'];
+        $formText = "Actualizar comida";
+        $formButtonText = "Actualizar";
+      } else {
+        $result = Menu::removeMenu($connection, $_GET['id']);
+        if ($result = 204) {
+          $successMessage = "Comida eliminada correctamente";
+          $popSuccessModal = true;
+          $classModal = "success";
+        } else {
+          if ($result == 500)
+            $errorMessage = "Hubo un error en el servidor";
+          $popErrorModal = true;
+          $classModal = "danger";
+        }
+      }
+    }
+  }
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<?php $hdTitle = "SCOT: Tiempos";
+<?php $hdTitle = "SCOT: Menús";
 require_once(__DIR__ . '../../templates/header.php') ?>
 
 <body class="g-sidenav-show  bg-gray-100">
@@ -90,12 +92,12 @@ require_once(__DIR__ . '../../templates/header.php') ?>
   <?php require_once(__DIR__ . '../../templates/modal.php') ?>
   <!-- End Modal -->
   <!-- Aside -->
-  <?php $option = 3;
+  <?php $option = 5;
   require_once(__DIR__ . '../../templates/aside.php') ?>
   <!-- End Aside -->
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
     <!-- Navbar -->
-    <?php $navTitle = "Administración de tiempos de comida";
+    <?php $navTitle = "Administración de menús";
     require_once(__DIR__ . '../../templates/navbar.php') ?>
     <!-- End Navbar -->
     <div class="container-fluid py-4">
@@ -104,7 +106,7 @@ require_once(__DIR__ . '../../templates/header.php') ?>
         <div class="col-12 col-xl-4">
           <div class="card h-100">
             <div class="card-header pb-0 p-3 border-0 d-flex align-items-center">
-              <h6 class="mb-0" id="mainFormTitle"><?php echo (isset($formText) ? $formText : "Crear tiempo de comida") ?></h6>
+              <h6 class="mb-0" id="mainFormTitle"><?php echo (isset($formText) ? $formText : "Crear comida") ?></h6>
               <p class="btn btn-link pe-3 ps-0 mb-0 ms-auto" id="clearMainForm">Limpiar</p>
             </div>
             <div class="card-body p-3">
@@ -115,7 +117,7 @@ require_once(__DIR__ . '../../templates/header.php') ?>
 
                 <?php if (isset($blockIdInput)) : ?>
                   <div class="mb-3" id="mainField">
-                    <h6 class="text-uppercase text-body text-xs font-weight-bolder">Identificador de tiempo</h6>
+                    <h6 class="text-uppercase text-body text-xs font-weight-bolder">Identificador de comida</h6>
                     <div>
                       <input type="hidden" name="id" value="<?php echo (isset($id) ? $id : "")  ?>">
                       <input type="text" class="form-control" id="formId" aria-label="id" aria-describedby="food-time-addon" value="<?php echo (isset($id) ? $id : "")  ?>" <?php echo (isset($blockIdInput) ? "disabled" : "")  ?>>
@@ -148,7 +150,7 @@ require_once(__DIR__ . '../../templates/header.php') ?>
           <div class="col-12">
             <div class="card mb-4">
               <div class="card-header pb-0">
-                <h6>Tiempos de comida</h6>
+                <h6>Menús</h6>
               </div>
               <div class="card-body px-0 pt-0 pb-2">
                 <div class="table-responsive p-0">
@@ -163,7 +165,7 @@ require_once(__DIR__ . '../../templates/header.php') ?>
                     </thead>
                     <tbody>
                       <?php
-                      $foodTimes = FoodTime::getAllFoodTimes($connection);
+                      $foodTimes = Menu::getAllMenus($connection);
                       if ($foodTimes) {
                         while ($row = $foodTimes->fetch_array(MYSQLI_ASSOC)) {
                           echo "
@@ -211,7 +213,7 @@ require_once(__DIR__ . '../../templates/header.php') ?>
                           deleteButtons.forEach((element) => {
                             element.addEventListener('click', (e) => {
                               e.preventDefault();
-                              if (confirm('¿Desea eliminar el tiempo de comida?')) {
+                              if (confirm('¿Desea eliminar la comida?')) {
                                 e.target.form.submit();
                               }
                             })
@@ -249,7 +251,7 @@ require_once(__DIR__ . '../../templates/header.php') ?>
   <script>
     document.getElementById("clearMainForm").addEventListener("click", (e) => {
       window.history.replaceState({}, document.title, `${window.location.pathname}`);
-      document.getElementById("mainFormTitle").textContent = "Crear tiempo";
+      document.getElementById("mainFormTitle").textContent = "Crear comida";
       let mainField = document.getElementById("mainField");
       if (mainField) mainField.remove();
       document.getElementById("mainFormName").value = "";
