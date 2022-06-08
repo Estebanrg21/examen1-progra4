@@ -165,9 +165,9 @@ require_once(__DIR__ . '../../templates/header.php') ?>
                     </thead>
                     <tbody>
                       <?php
-                      $foodTimes = Menu::getAllMenus($connection);
-                      if ($foodTimes) {
-                        while ($row = $foodTimes->fetch_array(MYSQLI_ASSOC)) {
+                      $menus = Menu::getAllMenus($connection);
+                      if ($menus) {
+                        while ($row = $menus->fetch_array(MYSQLI_ASSOC)) {
                           echo "
                             <tr>
                               <td class=\"align-middle text-center text-sm\">

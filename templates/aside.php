@@ -2,7 +2,7 @@
   <div class="sidenav-header">
     <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
     <a class="navbar-brand m-0" href="/">
-      <img src="../assets/img/logo-ct.png" class="navbar-brand-img h-100" alt="main_logo">
+      <img src="/assets/img/logo-ct.png" class="navbar-brand-img h-100" alt="main_logo">
       <span class="ms-1 font-weight-bold">SCOT</span>
     </a>
   </div>
@@ -191,7 +191,7 @@
       <li class="nav-item">
         <a class="nav-link  <?php echo (isset($option) ? (($option == 5) ? "active" : "") : "") ?>" href="../dashboard/menus-admin.php">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+            <svg width="12px" height="12px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
               <g>
                 <g>
                   <path d="M504.35,0H9.417C4.704,0,0,3.24,0,7.956v119.467V502.89c0,4.717,4.704,9.11,9.417,9.11H504.35
