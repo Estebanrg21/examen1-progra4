@@ -96,7 +96,7 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
     <!-- End Aside -->
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
         <!-- Navbar -->
-        <?php $navTitle = "Asignación de menús";
+        <?php $navTitle = "Asignación de menús a fecha: ".(new DateTime($_SESSION['date']))->format('d/m/Y')." siendo las ".(new DateTime($_SESSION['date']))->format('H:i A');
         $linksNav = [["/dashboard/menu-assignment.php","Asignar menús!"]];
         require_once(__DIR__ . '/../../templates/navbar.php') ?>
         <!-- End Navbar -->

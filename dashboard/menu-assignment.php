@@ -53,6 +53,7 @@ if (isset($_GET["start"]) && isset($_GET["end"])) {
             form.action = '#';
             document.body.appendChild(form);
             let input = document.createElement("input");
+            input.type="hidden";
             input.name = "date";
             input.value = date;
             form.appendChild(input);
@@ -63,6 +64,7 @@ if (isset($_GET["start"]) && isset($_GET["end"])) {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek',
+                hiddenDays: [ 0, 6 ],
                 editable: true,
                 selectable: true,
                 dateClick: function(info) {
