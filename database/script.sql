@@ -55,7 +55,7 @@ CREATE TABLE menus(
 
 CREATE TABLE menus_details(
     id bigint PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    day_served DATE NOT NULL,
+    day_served DATETIME NOT NULL,
     id_food_time bigint NOT NULL,
     creator varchar(100) NOT NULL,
     id_menu bigint NOT NULL,
@@ -63,7 +63,8 @@ CREATE TABLE menus_details(
     FOREIGN KEY (id_food_time) REFERENCES food_times(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (id_menu) REFERENCES menus(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (creator) REFERENCES users(email) ON UPDATE CASCADE ON DELETE CASCADE,
-    INDEX(day_served)
+    INDEX(day_served),
+    UNIQUE(id_food_time,day_served)
 );
 
 insert into users values ("scot@estebanramirez.xyz",md5("muvpeq-5dikcU-beqgoz"),"Super usuario",1,0);

@@ -4,10 +4,21 @@ $sessionCondition =  (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']);
 $headerLoc = "/dashboard.php";
 require_once(__DIR__ . "/../templates/sessionValidation.php");
 require_once(__DIR__ . "/../util.php");
+require_once(__DIR__ . "/../models/DateMenu.php");
+require_once(__DIR__ . "/../database/database.php");
+[$db, $connection] = Database::getConnection();
 if (areSubmitted(["date"])) {
-    if (isDateValid( $_POST["date"] )) {
+    if (isDateValid($_POST["date"])) {
         $_SESSION["date"] = $_POST["date"];
         header("Location: /dashboard/menu-assignment/edit-date.php");
+    }
+}
+if (isset($_GET["start"]) && isset($_GET["end"])) {
+    if (isDateValid($_GET["start"]) && isDateValid($_GET["end"])) {
+        $start = (new DateTime($_GET["start"]))->format('Y-m-d H:i:s');
+        $end = (new DateTime($_GET["end"]))->format('Y-m-d H:i:s');
+        DateMenu::getAllDateMenusWithRange($connection, $start, $end);
+        exit;
     }
 }
 ?>
@@ -36,25 +47,36 @@ if (areSubmitted(["date"])) {
     <link rel="stylesheet" href="/assets/fullcalendar-5.11.0/lib/main.min.css" />
     <script src="/assets/fullcalendar-5.11.0/lib/main.min.js"></script>
     <script>
+        function formDate(date) {
+            let form = document.createElement("form");
+            form.method = 'POST';
+            form.action = '#';
+            document.body.appendChild(form);
+            let input = document.createElement("input");
+            input.name = "date";
+            input.value = date;
+            form.appendChild(input);
+            form.submit();
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridWeek',
+                initialView: 'timeGridWeek',
                 editable: true,
                 selectable: true,
-                dateClick: function(info,instance=this) {
-                    let form = document.createElement("form");
-                    form.method = 'POST';
-                    form.action = '#';
-                    document.body.appendChild(form);
-                    let input = document.createElement("input");
-                    input.name = "date";
-                    input.value = info.dateStr;
-                    form.appendChild(input);
-                    
-                    form.submit();
+                dateClick: function(info) {
+                    formDate(info.dateStr);
+                },
+                events: {
+                    url: '/dashboard/menu-assignment.php',
+                    failure: function() {
+                        alert("No se logró cargar el calendario");
+                    }
+                },
+                eventClick: function(info) {
+                    formDate(info.event.extendedProps.dbStart);
                 }
-
             });
             calendar.render();
         });
@@ -70,13 +92,14 @@ if (areSubmitted(["date"])) {
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
         <!-- Navbar -->
         <?php $navTitle = "Asignación de menús";
+
         require_once(__DIR__ . '../../templates/navbar.php') ?>
         <!-- End Navbar -->
         <div class="container-fluid py-4">
             <div id='calendar'></div>
         </div>
     </main>
-      <!-- Scripts -->
-  <?php require_once(__DIR__ . '../../templates/scripts.php') ?>
-  <!-- End Scripts -->
+    <!-- Scripts -->
+    <?php require_once(__DIR__ . '../../templates/scripts.php') ?>
+    <!-- End Scripts -->
 </body>
