@@ -48,19 +48,19 @@ if (areSubmitted(DateMenu::$UPDATE_REQUIRED_FIELDS)) {
     } else {
         $errorSubmission = "Los campos no pueden estar vacíos";
     }
-}else if (isset($_GET['id']) && isset($_GET['m'])) {
+} else if (isset($_GET['id']) && isset($_GET['m'])) {
     $dateMenuResult = DateMenu::getDateMenu($connection, $_GET['id'], $_GET['m'] == 'd', $_GET['m'] != 'd');
     if ($dateMenuResult) {
         if ($_GET['m'] != 'd') {
-                $id = $dateMenuResult['id'];
-                $blockIdInput = true;
-                $idFood = $dateMenuResult["idFood"];
-                $idMenu = $dateMenuResult["idMenu"];
-                $foodTime = $dateMenuResult["tname"];
-                $menu = $dateMenuResult["mname"];
-                $description =  $dateMenuResult['description'];
-                $formText = "Actualizar sección";
-                $formButtonText = "Actualizar";
+            $id = $dateMenuResult['id'];
+            $blockIdInput = true;
+            $idFood = $dateMenuResult["idFood"];
+            $idMenu = $dateMenuResult["idMenu"];
+            $foodTime = $dateMenuResult["tname"];
+            $menu = $dateMenuResult["mname"];
+            $description =  $dateMenuResult['description'];
+            $formText = "Actualizar sección";
+            $formButtonText = "Actualizar";
         } else {
             $result = DateMenu::removeMenu($connection, $_GET['id']);
             [$text, $isOk] = DateMenu::$responseCodes[$result];
@@ -95,8 +95,9 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
     <!-- End Aside -->
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
         <!-- Navbar -->
-        <?php $navTitle = "Asignación de menús a fecha: ".(new DateTime($_SESSION['date']))->format('d/m/Y')." siendo las ".(new DateTime($_SESSION['date']))->format('H:i A');
-        $linksNav = [["/dashboard/menu-assignment.php","Asignar menús!","fa-calendar-check"]];
+        <?php $navTitle = "Asignación de menús a fecha: " . (new DateTime($_SESSION['date']))->format('d/m/Y') . " siendo las " . (new DateTime($_SESSION['date']))->format('H:i A');
+        if (isset($blockIdInput)) $navTitle = "Asignación de menús: ".(new DateTime($_SESSION['date']))->format('d/m/Y') ;
+        $linksNav = [["/dashboard/menu-assignment.php", "Asignar menús!", "fa-calendar-check"]];
         require_once(__DIR__ . '/../../templates/navbar.php') ?>
         <!-- End Navbar -->
         <div class="container-fluid py-4 row">
@@ -179,6 +180,7 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
                                         <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Identificador</th>
                                         <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 ">Tiempo de comida</th>
                                         <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 ">Menu</th>
+                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 ">Hora</th>
                                         <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 ">Descripción</th>
                                         <th class="text-secondary opacity-7"></th>
                                     </tr>
@@ -200,6 +202,10 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
 
                                                 <td class=\"align-middle text-center text-sm\">
                                                     <p class=\"text-xs font-weight-bold mb-0\">" . $row["mname"] . "</p>
+                                                </td>
+
+                                                <td class=\"align-middle text-center text-sm\">
+                                                    <p class=\"text-xs font-weight-bold mb-0\">" .(new DateTime($row["start"]))->format('H:i') . "</p>
                                                 </td>
 
                                                 <td class=\"align-middle text-center text-sm text-wrap\">

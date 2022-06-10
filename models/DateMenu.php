@@ -128,7 +128,7 @@ class DateMenu
         if (isDateValid($date)) {
 
             $statement = $connection->prepare("select menus_details.id as id,food_times.name as tname, 
-            menus.name as mname, menus_details.description as description 
+            menus.name as mname, menus_details.description as description, start
             from menus_details inner JOIN food_times on food_times.id=menus_details.id_food_time 
             inner JOIN menus on menus.id=menus_details.id_menu where day_served=?");
             $statement->bind_param('s', $date);
