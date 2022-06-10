@@ -14,7 +14,7 @@
               echo "
               <li class=\"nav-item d-flex align-items-center me-2\">
                 <a href=\"$linkNav[0]\" class=\"nav-link text-body font-weight-bold px-0 \">
-                  <i class=\"fa me-sm-1 fa-calendar-check\"></i>
+                  <i class=\"fa me-sm-1 ".$linkNav[2]."\"></i>
                   <span class=\"d-sm-inline d-none text-decoration-underline\">$linkNav[1]</span>
                 </a>
             </li>
@@ -23,9 +23,9 @@
           ?>
         <?php endif; ?>
         <li class="nav-item d-flex align-items-center">
-          <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
-            <i class="fa fa-user me-sm-1"></i>
-            <span class="d-sm-inline d-none"><?php echo (isset($_SESSION['user']) ? $_SESSION['user'] : "") ?></span>
+          <a href="<?php echo (isset($_SESSION['user']) ?"/dashboard.php" : "/login.php") ?>" class="nav-link text-body font-weight-bold px-0">
+            <i class="fa <?php echo (isset($_SESSION['user']) ?"fa-user" : "fa-solid fa-lock") ?> me-sm-1"></i>
+            <span class="d-sm-inline d-none"><?php echo (isset($_SESSION['user']) ? $_SESSION['user'] : "Login") ?></span>
           </a>
         </li>
         <li class="nav-item d-xl-none ps-3 d-flex align-items-center">

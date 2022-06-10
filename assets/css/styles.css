@@ -24,3 +24,10 @@
     border-color: #fff !important;
     color:#fff !important;
 }
+.bg-cbdark{
+    background:  #2B3843 !important;
+    color: white !important;
+}
+.bg-cbdark * {
+    color: white !important;
+}

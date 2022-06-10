@@ -1,18 +1,8 @@
 <?php
-session_start();
-$sessionCondition =  (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']);
-$headerLoc = "/dashboard.php";
-require_once(__DIR__ . "/../templates/sessionValidation.php");
 require_once(__DIR__ . "/../util.php");
 require_once(__DIR__ . "/../models/DateMenu.php");
 require_once(__DIR__ . "/../database/database.php");
 [$db, $connection] = Database::getConnection();
-if (areSubmitted(["date"])) {
-    if (isDateValid($_POST["date"])) {
-        $_SESSION["date"] = $_POST["date"];
-        header("Location: /dashboard/menu-assignment/edit-date.php");
-    }
-}
 if (isset($_GET["start"]) && isset($_GET["end"])) {
     if (isDateValid($_GET["start"]) && isDateValid($_GET["end"])) {
         $start = (new DateTime($_GET["start"]))->format('Y-m-d H:i:s');
@@ -21,6 +11,21 @@ if (isset($_GET["start"]) && isset($_GET["end"])) {
         exit;
     }
 }
+session_start();
+$sessionCondition =  (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']);
+$headerLoc = "/dashboard.php";
+require_once(__DIR__ . "/../templates/sessionValidation.php");
+if (areSubmitted(["date"])) {
+    if (isDateValid($_POST["date"])) {
+        $_SESSION["date"] =  $_POST["date"];
+        $_SESSION["date_start"] =  $_POST["date"];
+        if(isset($_POST["id"]))
+            header("Location: /dashboard/menu-assignment/edit-date.php?id=".$_POST['id']."&m=u");
+        else
+            header("Location: /dashboard/menu-assignment/edit-date.php");
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -47,16 +52,19 @@ if (isset($_GET["start"]) && isset($_GET["end"])) {
     <link rel="stylesheet" href="/assets/fullcalendar-5.11.0/lib/main.min.css" />
     <script src="/assets/fullcalendar-5.11.0/lib/main.min.js"></script>
     <script>
-        function formDate(date) {
+        function formDate(inputsValues) {
             let form = document.createElement("form");
             form.method = 'POST';
             form.action = '#';
             document.body.appendChild(form);
-            let input = document.createElement("input");
-            input.type="hidden";
-            input.name = "date";
-            input.value = date;
-            form.appendChild(input);
+            for (let i = 0; i < inputsValues.length; i++) {
+                const structure= inputsValues[i];
+                let input = document.createElement("input");    
+                input.type="hidden";
+                input.name =structure.name;
+                input.value = structure.value;
+                form.appendChild(input);
+            }     
             form.submit();
         }
 
@@ -68,7 +76,7 @@ if (isset($_GET["start"]) && isset($_GET["end"])) {
                 editable: true,
                 selectable: true,
                 dateClick: function(info) {
-                    formDate(info.dateStr);
+                    formDate([{name:"date",value:info.dateStr}]);
                 },
                 events: {
                     url: '/dashboard/menu-assignment.php',
@@ -77,7 +85,10 @@ if (isset($_GET["start"]) && isset($_GET["end"])) {
                     }
                 },
                 eventClick: function(info) {
-                    formDate(info.event.extendedProps.dbStart);
+                    formDate([
+                        {name:"date",value:info.event.extendedProps.dbStart},
+                        {name:"id",value:info.event.extendedProps.identificator}
+                    ]);
                 }
             });
             calendar.render();

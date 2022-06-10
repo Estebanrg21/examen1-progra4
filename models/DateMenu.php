@@ -21,7 +21,8 @@ class DateMenu
     function __construct($idFoodTime, $idMenu, $description, $id = null)
     {
         $this->id = $id;
-        $this->dayServed = (new DateTime($_SESSION['date']))->format('Y-m-d H:i:s');
+        $this->dayStart = (new DateTime($_SESSION['date']))->format('Y-m-d H:i:s');
+        $this->dayServed = (new DateTime($_SESSION["date_start"]))->format('Y-m-d');
         $this->idFoodTime = $idFoodTime;
         $this->idMenu = $idMenu;
         $this->creator = $_SESSION['user'];
@@ -96,8 +97,8 @@ class DateMenu
             }
         } else {
             if ($this->isUnique()) {
-                $statement = $this->connection->prepare("INSERT INTO menus_details(day_served,id_food_time,creator,id_menu,description) VALUES (?, ?, ?, ?, ?)");
-                $statement->bind_param('sisis', $this->dayServed, $this->idFoodTime, $this->creator, $this->idMenu, $this->description);
+                $statement = $this->connection->prepare("INSERT INTO menus_details(day_served,id_food_time,creator,id_menu,description,start) VALUES (?, ?, ?, ?, ?, ?)");
+                $statement->bind_param('sisiss', $this->dayServed, $this->idFoodTime, $this->creator, $this->idMenu, $this->description,$this->dayStart);
                 $response = 0;
             }else{
                 $response = 13;
@@ -139,8 +140,8 @@ class DateMenu
     }
 
     public static function getAllDateMenusWithRange($connection, $start,$end){
-        $statement = $connection->prepare("select menus.name as title, menus_details.day_served as start, menus_details.day_served as dbStart 
-        from menus_details inner JOIN menus on menus.id=menus_details.id_menu 
+        $statement = $connection->prepare("select menus.name as title, start, start as dbStart, 
+        menus_details.id as identificator from menus_details inner JOIN menus on menus.id=menus_details.id_menu 
         where day_served BETWEEN ? and ?");
             $statement->bind_param('ss', $start,$end);
             $statement->execute();

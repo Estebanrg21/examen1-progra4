@@ -8,8 +8,7 @@ require_once(__DIR__ . "/../../database/database.php");
 require_once(__DIR__ . "/../../models/Menu.php");
 require_once(__DIR__ . "/../../models/DateMenu.php");
 [$db, $connection] = Database::getConnection();
-$_SESSION['expire'] = $_SESSION['start'] + (60 * 60);
-if (!isset($_SESSION["date"])) {
+if (!isset($_SESSION["date"]) || !isset($_SESSION["date_start"])) {
     header("Location: /dashboard/menu-assignment.php");
 }
 if (isset($_GET["items"])) {
@@ -97,7 +96,7 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
         <!-- Navbar -->
         <?php $navTitle = "Asignación de menús a fecha: ".(new DateTime($_SESSION['date']))->format('d/m/Y')." siendo las ".(new DateTime($_SESSION['date']))->format('H:i A');
-        $linksNav = [["/dashboard/menu-assignment.php","Asignar menús!"]];
+        $linksNav = [["/dashboard/menu-assignment.php","Asignar menús!","fa-calendar-check"]];
         require_once(__DIR__ . '/../../templates/navbar.php') ?>
         <!-- End Navbar -->
         <div class="container-fluid py-4 row">
@@ -186,7 +185,7 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $items = DateMenu::getAllDateMenus($connection, $_SESSION["date"]);
+                                    $items = DateMenu::getAllDateMenus($connection, (new DateTime($_SESSION["date_start"]))->format('Y-m-d'));
                                     if ($items) {
                                         while ($row = $items->fetch_array(MYSQLI_ASSOC)) {
                                             echo "
