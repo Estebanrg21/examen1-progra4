@@ -1,28 +1,32 @@
 <?php
+session_start();
+if (isset($_SESSION['verification'])) {
+  header("Location: dashboard.php");
+}
+require_once "database/database.php";
+require_once "models/User.php";
+[$db, $connection] = Database::getConnection();
+if (isset($_POST['email']) && isset($_POST['password'])) {
+  $user = new User($_POST['email'], $_POST['password']);
+  $user->connection = $connection;
+  if ($user->login()) {
     session_start();
-    if(isset($_SESSION['verification'])){
-        header("Location: dashboard.php");
+    $_SESSION['user'] = $user->email;
+    $_SESSION['isSuper'] = $user->isSu;
+    $_SESSION['isAdmin'] = $user->isAdmin;
+    $_SESSION['verification'] = true;
+    $_SESSION['start'] = time();
+    if ($user->isSu || $user->isAdmin) {
+      $_SESSION['LAST_ACTIVITY'] = time();
+    } else {
+      $_SESSION['expire'] = $_SESSION['start'] + (60 * 60);
     }
-    require_once "database/database.php";
-    require_once "models/User.php";
-    [$db,$connection] = Database::getConnection();
-		if(isset($_POST['email']) && isset($_POST['password'])){
-			$user = new User($_POST['email'],$_POST['password']);
-            $user->connection = $connection;
-            if($user->login()){
-                session_start();
-                $_SESSION['user']=$user->email;
-                $_SESSION['isSuper'] = $user->isSu;
-                $_SESSION['isAdmin'] = $user->isAdmin;
-                $_SESSION['verification']=true;
-                $_SESSION['start'] = time();
-                $_SESSION['expire'] = $_SESSION['start'] + (60 * 60);
-                header("Location: /dashboard.php");
-            }else{
-                $loginError="Datos incorrectos";
-            }
-		}
-	?>
+    header("Location: /dashboard.php");
+  } else {
+    $loginError = "Datos incorrectos";
+  }
+}
+?>
 
 <!--
 =========================================================
@@ -80,9 +84,9 @@
                 </div>
                 <div class="card-body">
                   <form role="form" action="#" method="POST">
-                  <?php if(isset($loginError)) : ?>
-                    <p class="text-danger text-xs font-weight-bolder p-0 mb-3" id="errorMessageValidate"><?php echo $loginError;?></p>
-                  <?php endif; ?>
+                    <?php if (isset($loginError)) : ?>
+                      <p class="text-danger text-xs font-weight-bolder p-0 mb-3" id="errorMessageValidate"><?php echo $loginError; ?></p>
+                    <?php endif; ?>
                     <label>Email</label>
                     <div class="mb-3">
                       <input type="email" name="email" class="form-control" placeholder="Email" aria-label="Email" aria-describedby="email-addon">

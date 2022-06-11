@@ -6,7 +6,7 @@ require_once(__DIR__ . "/../util.php");
 
 class DateMenu
 {
-    public static $INSERT_REQUIRED_FIELDS = ["idFood", "idMenu", "description"];
+    public static $INSERT_REQUIRED_FIELDS = ["idFood", "idMenu","endTime", "description"];
     public static $UPDATE_REQUIRED_FIELDS = ["id"];
     public static $responseCodes = [
         0 => ["Asignación creada correctamente!", true],
@@ -18,11 +18,12 @@ class DateMenu
         14 => ["Asignación no necesita actualizarse", false],
 
     ];
-    function __construct($idFoodTime, $idMenu, $description, $id = null)
+    function __construct($startTime,$endTime,$idFoodTime, $idMenu, $description, $id = null)
     {
         $this->id = $id;
-        $this->dayStart = (new DateTime($_SESSION['date']))->format('Y-m-d H:i:s');
-        $this->dayServed = (new DateTime($_SESSION["date_start"]))->format('Y-m-d');
+        $this->startTime = (new DateTime($startTime))->format('Y-m-d H:i:s');
+        $this->dayServed = (new DateTime($_SESSION["date"]))->format('Y-m-d');
+        $this->endTime = (new DateTime($endTime))->format('Y-m-d H:i:s');
         $this->idFoodTime = $idFoodTime;
         $this->idMenu = $idMenu;
         $this->creator = $_SESSION['user'];
@@ -35,7 +36,7 @@ class DateMenu
         
         if ($retrieveAllData && !$onlyCheckExistance) {
             $query = "select menus_details.id as id,food_times.id as idFood,food_times.name as tname, 
-            menus.id as idMenu,menus.name as mname, menus_details.description as description 
+            menus.id as idMenu,menus.name as mname, menus_details.description as description, start,end   
             from menus_details inner JOIN food_times on food_times.id=menus_details.id_food_time 
             inner JOIN menus on menus.id=menus_details.id_menu where menus_details.id=?";
         }else{
@@ -74,6 +75,7 @@ class DateMenu
         if (
             strlen($this->description) > 100 || !is_numeric($this->idFoodTime)
             || !is_numeric($this->idMenu) || !isDateValid($this->dayServed)
+            || !isDateValid($this->startTime) || !isDateValid($this->endTime) 
         ) {
             $response = 10;
             return $response;
@@ -85,6 +87,8 @@ class DateMenu
                 "id_food_time" => [$this->idFoodTime, $existingDateMenu['id_food_time'], "i"],
                 "id_menu" => [$this->idMenu, $existingDateMenu['id_menu'], "i"],
                 "description" => [$this->description, $existingDateMenu['description'], "s"],
+                "start" => [$this->startTime, $existingDateMenu['start'], "s"],
+                "end" => [$this->endTime, $existingDateMenu['end'], "s"],
             ]);
             if (count($fields) == 0) {
                 $response = 14;
@@ -97,8 +101,8 @@ class DateMenu
             }
         } else {
             if ($this->isUnique()) {
-                $statement = $this->connection->prepare("INSERT INTO menus_details(day_served,id_food_time,creator,id_menu,description,start) VALUES (?, ?, ?, ?, ?, ?)");
-                $statement->bind_param('sisiss', $this->dayServed, $this->idFoodTime, $this->creator, $this->idMenu, $this->description,$this->dayStart);
+                $statement = $this->connection->prepare("INSERT INTO menus_details(day_served,id_food_time,creator,id_menu,description,start,end) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $statement->bind_param('sisisss', $this->dayServed, $this->idFoodTime, $this->creator, $this->idMenu, $this->description,$this->startTime,$this->endTime);
                 $response = 0;
             }else{
                 $response = 13;
@@ -128,7 +132,7 @@ class DateMenu
         if (isDateValid($date)) {
 
             $statement = $connection->prepare("select menus_details.id as id,food_times.name as tname, 
-            menus.name as mname, menus_details.description as description, start
+            menus.name as mname, menus_details.description as description, start, end 
             from menus_details inner JOIN food_times on food_times.id=menus_details.id_food_time 
             inner JOIN menus on menus.id=menus_details.id_menu where day_served=?");
             $statement->bind_param('s', $date);
@@ -140,7 +144,7 @@ class DateMenu
     }
 
     public static function getAllDateMenusWithRange($connection, $start,$end){
-        $statement = $connection->prepare("select menus.name as title, start, start as dbStart, 
+        $statement = $connection->prepare("select menus.name as title, start,end, start as dbStart, 
         menus_details.id as identificator from menus_details inner JOIN menus on menus.id=menus_details.id_menu 
         where day_served BETWEEN ? and ?");
             $statement->bind_param('ss', $start,$end);

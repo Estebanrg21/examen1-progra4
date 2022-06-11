@@ -18,9 +18,8 @@ require_once(__DIR__ . "/../templates/sessionValidation.php");
 if (areSubmitted(["date"])) {
     if (isDateValid($_POST["date"])) {
         $_SESSION["date"] =  $_POST["date"];
-        $_SESSION["date_start"] =  $_POST["date"];
-        if(isset($_POST["id"]))
-            header("Location: /dashboard/menu-assignment/edit-date.php?id=".$_POST['id']."&m=u");
+        if (isset($_POST["id"]))
+            header("Location: /dashboard/menu-assignment/edit-date.php?id=" . $_POST['id'] . "&m=u");
         else
             header("Location: /dashboard/menu-assignment/edit-date.php");
     }
@@ -42,7 +41,6 @@ if (areSubmitted(["date"])) {
     <!--     Fonts and icons     -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
     <!-- Nucleo Icons -->
-    <link href="../assets/css/styles.css" rel="stylesheet" />
     <link href="../assets/css/nucleo-svg.css" rel="stylesheet" />
     <!-- Font Awesome Icons -->
     <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
@@ -58,13 +56,13 @@ if (areSubmitted(["date"])) {
             form.action = '#';
             document.body.appendChild(form);
             for (let i = 0; i < inputsValues.length; i++) {
-                const structure= inputsValues[i];
-                let input = document.createElement("input");    
-                input.type="hidden";
-                input.name =structure.name;
+                const structure = inputsValues[i];
+                let input = document.createElement("input");
+                input.type = "hidden";
+                input.name = structure.name;
                 input.value = structure.value;
                 form.appendChild(input);
-            }     
+            }
             form.submit();
         }
 
@@ -72,11 +70,30 @@ if (areSubmitted(["date"])) {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek',
-                hiddenDays: [ 0, 6 ],
-                editable: true,
+                headerToolbar: {
+                    right: 'timeGridWeek prev,next'
+                },
+                scrollTime:'07:00:00',
+                locale: 'es',
+                hiddenDays: [0, 6],
+                allDaySlot: false,
+                eventMinHeight: 50,
+                navLinks: true,
+                slotDuration: '01:00',
+                slotLabelFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                },
+                expandRows: true,
                 selectable: true,
+                displayEventEnd: true,
+                eventMaxStack: 1,
                 dateClick: function(info) {
-                    formDate([{name:"date",value:info.dateStr}]);
+                    formDate([{
+                        name: "date",
+                        value: info.dateStr
+                    }]);
                 },
                 events: {
                     url: '/dashboard/menu-assignment.php',
@@ -85,15 +102,27 @@ if (areSubmitted(["date"])) {
                     }
                 },
                 eventClick: function(info) {
-                    formDate([
-                        {name:"date",value:info.event.extendedProps.dbStart},
-                        {name:"id",value:info.event.extendedProps.identificator}
+                    formDate([{
+                            name: "date",
+                            value: info.event.extendedProps.dbStart
+                        },
+                        {
+                            name: "id",
+                            value: info.event.extendedProps.identificator
+                        }
                     ]);
-                }
+                },
             });
             calendar.render();
         });
     </script>
+    <style>
+        .fc-timegrid-slot,
+        .fc-timegrid-slot-label {
+            height: 100px !important;
+        }
+    </style>
+    <link href="/assets/css/styles.css" rel="stylesheet" />
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">

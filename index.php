@@ -1,5 +1,21 @@
 <?php
 session_start();
+require_once(__DIR__ . "/util.php");
+require_once(__DIR__ . "/database/database.php");
+require_once(__DIR__ . "/models/DateMenu.php");
+[$db, $connection] = Database::getConnection();
+if(areSubmitted(["id"])){
+    if(checkInput(["id"])){
+        $menu = DateMenu::getDateMenu($connection,$_POST["id"],false,true);
+        if($menu){
+            $tname = $menu["tname"];
+            $mname = $menu["mname"];
+            $start = $menu["start"];
+            $end = $menu["end"];
+            $description = $menu["description"];
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -24,7 +40,58 @@ session_start();
     <!-- FullCalendar dependencies -->
     <link rel="stylesheet" href="/assets/fullcalendar-5.11.0/lib/main.min.css" />
     <script src="/assets/fullcalendar-5.11.0/lib/main.min.js"></script>
+    <style>
+        .fc-event {
+            height: 100px;
+            background: #a31e32;
+            color: white;
+            cursor: pointer;
+        }
+
+        body {
+            background: #2B3843;
+
+        }
+
+        body * {
+            color: white;
+        }
+
+        .shadow-blur h6,
+        .shadow-blur span,
+        .shadow-blur i {
+            color: #2B3843 !important;
+        }
+
+        .fc .fc-daygrid-day.fc-day-today {
+            background: rgba(23, 30, 36, 0.5);
+        }
+
+        .fc-daygrid-dot-event:hover {
+            background: white;
+
+        }
+
+        .fc-daygrid-dot-event:hover * {
+            color: #2B3843;
+        }
+    </style>
     <script>
+        function formDate(inputsValues) {
+            let form = document.createElement("form");
+            form.method = 'POST';
+            form.action = '#';
+            document.body.appendChild(form);
+            for (let i = 0; i < inputsValues.length; i++) {
+                const structure = inputsValues[i];
+                let input = document.createElement("input");
+                input.type = "hidden";
+                input.name = structure.name;
+                input.value = structure.value;
+                form.appendChild(input);
+            }
+            form.submit();
+        }
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -32,8 +99,9 @@ session_start();
                 headerToolbar: {
                     end: ''
                 },
+                locale: 'es',
                 hiddenDays: [0, 6],
-                editable: true,
+                editable: false,
                 selectable: true,
                 events: {
                     height: "100%",
@@ -43,7 +111,12 @@ session_start();
                     }
                 },
                 eventClick: function(info) {
-                    console.log(info);
+                    info = info.event;
+                    formDate([{
+                        name: "id",
+                        value: info.extendedProps.identificator
+                    }]);
+
                 }
             });
             calendar.render();
@@ -54,13 +127,32 @@ session_start();
 <body>
     <div class="modal fade" id="Modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down position-relative">
-            <div class="px-3  modal-content d-flex flex-column justify-content-around bg-cbdark">
-                <div class="modal-header bg-cbdark">
+            <div class="px-3  modal-content d-flex flex-column justify-content-around bg-modal-menu">
+                <div class="modal-header bg-modal-menu">
                     <h5 class="modal-title" id="exampleModalToggleLabel2">Información del menú</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="modalBody">
-
+                <div class="modal-body d-flex flex-column justify-content-evenly" id="modalBody">
+                    <div>
+                        <h6>Tiempo de comida:</h6>
+                        <p><?php echo (isset($tname) ?$tname : "") ?></p>
+                    </div>
+                    <div>
+                        <h6>Empieza:</h6>
+                        <p><?php echo (isset($start) ?(new DateTime($start))->format('H:i A') : "") ?></p>
+                    </div>
+                    <div>
+                        <h6>Termina:</h6>
+                        <p><?php echo (isset($end) ?(new DateTime($end))->format('H:i A') : "") ?></p>
+                    </div>
+                    <div>
+                        <h6>Menú:</h6>
+                        <p><?php echo (isset($mname) ?$mname : "") ?></p>
+                    </div>
+                    <div>
+                        <h6>Descripción:</h6>
+                        <p><?php echo (isset($description) ?$description : "") ?></p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -99,6 +191,9 @@ session_start();
             let modal = new bootstrap.Modal(document.getElementById('Modal'));
             modal.show();
         }
+        <?php if (isset($menu)) : ?>
+            openModal();
+        <?php endif; ?>
     </script>
 </body>
 

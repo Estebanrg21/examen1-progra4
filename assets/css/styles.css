@@ -24,10 +24,42 @@
     border-color: #fff !important;
     color:#fff !important;
 }
-.bg-cbdark{
-    background:  #2B3843 !important;
+.bg-modal-menu{
+    background:  #a31e32 !important;
     color: white !important;
 }
-.bg-cbdark * {
+.bg-modal-menu * {
     color: white !important;
 }
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,.fc .fc-button-primary:hover{
+    background:  #701523;
+    border-color:#701523;
+}
+.fc .fc-button-primary{
+    background:  #a31e32;
+    border-color:  #a31e32;
+}
+.fc-daygrid-event{
+    height: 100px;
+    background:  #a31e32;
+    color:white;
+}
+.fc-daygrid-event:hover{
+    background:  #701523;
+}
+.fc-axis{
+    min-width:100px; 
+ 
+}
+@media only screen and (max-width: 402px) {
+    body {
+      background-color: lightblue;
+    }
+    #calendar .fc-header-toolbar div:last-child{
+        display: flex;
+        
+        
+        justify-content: space-between;
+    }
+  }

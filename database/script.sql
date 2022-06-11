@@ -57,6 +57,7 @@ CREATE TABLE menus_details(
     id bigint PRIMARY KEY NOT NULL AUTO_INCREMENT,
     day_served DATE NOT NULL,
     start DATETIME NOT NULL,
+    end DATETIME NOT NULL,
     id_food_time bigint NOT NULL,
     creator varchar(100) NOT NULL,
     id_menu bigint NOT NULL,

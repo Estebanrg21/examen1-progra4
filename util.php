@@ -145,3 +145,12 @@ function isDateValid($str)
     }
     return false;
 }
+
+
+function strTieHourAndDate($date, $hour){
+    return (new DateTime($date))->format('Y-m-d') . $hour;
+}
+
+function hourToDateTime($d,$h){
+    return new DateTime(strTieHourAndDate($d,$h)); 
+}

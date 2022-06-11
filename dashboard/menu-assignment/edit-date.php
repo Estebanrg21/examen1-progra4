@@ -8,43 +8,72 @@ require_once(__DIR__ . "/../../database/database.php");
 require_once(__DIR__ . "/../../models/Menu.php");
 require_once(__DIR__ . "/../../models/DateMenu.php");
 [$db, $connection] = Database::getConnection();
-if (!isset($_SESSION["date"]) || !isset($_SESSION["date_start"])) {
+if (!isset($_SESSION["date"])) {
     header("Location: /dashboard/menu-assignment.php");
+} else {
+    $startTime =  (new DateTime($_SESSION["date"]))->format('H:i:s');
 }
+
+
+
 if (isset($_GET["items"])) {
     try {
-        Menu::getAllItemsHtml($connection, $_GET["items"]);
+        if (!checkSessionExpiration()) {
+            Menu::getAllItemsHtml($connection, $_GET["items"]);
+        } else {
+            throw new Exception("Session expired");
+        }
     } catch (\Throwable $th) {
         header($_SERVER["SERVER_PROTOCOL"] . ' 500 Internal Server Error', true, 500);
         echo 'No se pudo cargar el conjunto de datos';
     }
     die;
 }
-if (areSubmitted(DateMenu::$INSERT_REQUIRED_FIELDS)) {
+if (areSubmitted(DateMenu::$INSERT_REQUIRED_FIELDS) && !isset($_POST["id"])) {
     if (checkInput(DateMenu::$INSERT_REQUIRED_FIELDS)) {
-        $dateMenu = new DateMenu(
-            (isset($_POST['idFood']) ? $_POST['idFood'] : null),
-            (isset($_POST['idMenu']) ? $_POST['idMenu'] : null),
-            (isset($_POST['description']) ? $_POST['description'] : null),
-        );
-        $dateMenu->connection = $connection;
-        $result = $dateMenu->save();
-        [$text, $isOk] = DateMenu::$responseCodes[$result];
+        if (!isDateValid($_POST["endTime"]) || !isDateValid($_POST["startTime"])) {
+            $errorSubmission = "Hora inválida";
+        } else {
+            if (hourToDateTime($_SESSION["date"], $_POST['endTime']) < hourToDateTime($_SESSION["date"],  $_POST['startTime'])) {
+                $errorSubmission = "Horas inválidas";
+            } else {
+                $dateMenu = new DateMenu(
+                    strTieHourAndDate($_SESSION["date"], $_POST['startTime']),
+                    strTieHourAndDate($_SESSION["date"], $_POST['endTime']),
+                    $_POST['idFood'],
+                    $_POST['idMenu'],
+                    $_POST['description']
+                );
+                $dateMenu->connection = $connection;
+                $result = $dateMenu->save();
+                [$text, $isOk] = DateMenu::$responseCodes[$result];
+            }
+        }
     } else {
         $errorSubmission = "Los campos no pueden estar vacíos";
     }
 }
 if (areSubmitted(DateMenu::$UPDATE_REQUIRED_FIELDS)) {
-    if (checkInput(["id", "idFood", "idMenu", "description"])) {
-        $dateMenu = new DateMenu(
-            (isset($_POST['idFood']) ? $_POST['idFood'] : null),
-            (isset($_POST['idMenu']) ? $_POST['idMenu'] : null),
-            (isset($_POST['description']) ? $_POST['description'] : null),
-            (isset($_POST['id']) ? $_POST['id'] : null)
-        );
-        $dateMenu->connection = $connection;
-        $result = $dateMenu->save();
-        [$text, $isOk] = DateMenu::$responseCodes[$result];
+    if (checkInput(["id", "idFood", "idMenu", "description", "endTime", "startTime"])) {
+        if (!isDateValid($_POST["endTime"]) || !isDateValid($_POST["startTime"])) {
+            $errorSubmission = "Hora inválida";
+        } else {
+            if (hourToDateTime($_SESSION["date"], $_POST['endTime']) < hourToDateTime($_SESSION["date"],  $_POST['startTime'])) {
+                $errorSubmission = "Horas inválidas";
+            } else {
+                $dateMenu = new DateMenu(
+                    strTieHourAndDate($_SESSION["date"], $_POST['startTime']),
+                    strTieHourAndDate($_SESSION["date"], $_POST['endTime']),
+                    $_POST['idFood'],
+                    $_POST['idMenu'],
+                    $_POST['description'],
+                    $_POST['id']
+                );
+                $dateMenu->connection = $connection;
+                $result = $dateMenu->save();
+                [$text, $isOk] = DateMenu::$responseCodes[$result];
+            }
+        }
     } else {
         $errorSubmission = "Los campos no pueden estar vacíos";
     }
@@ -58,8 +87,10 @@ if (areSubmitted(DateMenu::$UPDATE_REQUIRED_FIELDS)) {
             $idMenu = $dateMenuResult["idMenu"];
             $foodTime = $dateMenuResult["tname"];
             $menu = $dateMenuResult["mname"];
+            $startTime = (new DateTime($dateMenuResult['start']))->format('H:i:s');
+            $endTime = (new DateTime($dateMenuResult['end']))->format('H:i:s');
             $description =  $dateMenuResult['description'];
-            $formText = "Actualizar sección";
+            $formText = "Actualizar asignación";
             $formButtonText = "Actualizar";
         } else {
             $result = DateMenu::removeMenu($connection, $_GET['id']);
@@ -76,6 +107,23 @@ if (isset($isOk)) {
         $successMessage = $text;
         $popSuccessModal = true;
         $classModal = "success";
+    }
+}
+if (isset($errorSubmission)) {
+    $startTime =  $_POST['startTime'];
+    $endTime =  $_POST['endTime'];
+    $description = $_POST['description'];
+    $idFood = $_POST["idFood"];
+    $idMenu = $_POST["idMenu"];
+    if (isset($_POST["foodTimeText"]))
+        $foodTime = $_POST["foodTimeText"];
+    if (isset($_POST["menuText"]))
+        $menu = $_POST["menuText"];
+    if (isset($_POST["id"])) {
+        $id = $_POST["id"];
+        $formText = "Actualizar asignación";
+        $formButtonText = "Actualizar";
+        $blockIdInput = true;
     }
 }
 ?>
@@ -95,8 +143,8 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
     <!-- End Aside -->
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
         <!-- Navbar -->
-        <?php $navTitle = "Asignación de menús a fecha: " . (new DateTime($_SESSION['date']))->format('d/m/Y') . " siendo las " . (new DateTime($_SESSION['date']))->format('H:i A');
-        if (isset($blockIdInput)) $navTitle = "Asignación de menús: ".(new DateTime($_SESSION['date']))->format('d/m/Y') ;
+        <?php $navTitle = "Asignación de menús a fecha: " . (new DateTime($_SESSION['date']))->format('d/m/Y');
+        if (isset($blockIdInput)) $navTitle = "Asignación de menús: " . (new DateTime($_SESSION['date']))->format('d/m/Y');
         $linksNav = [["/dashboard/menu-assignment.php", "Asignar menús!", "fa-calendar-check"]];
         require_once(__DIR__ . '/../../templates/navbar.php') ?>
         <!-- End Navbar -->
@@ -127,16 +175,16 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
                             <div class="mb-3">
                                 <h6 class="text-uppercase text-body text-xs font-weight-bolder">Tiempo de comida</h6>
                                 <div class="d-flex align-items-center mb-3">
-                                    <input type="hidden" name="idFood" value="<?php echo (isset($idFood) ? $idFood : "")  ?>" />
-                                    <input disabled type="text" class="form-control me-4" style="padding-left:20px !important;" aria-label="Tiempo" aria-describedby="text-addon" value="<?php echo (isset($foodTime) ? $foodTime : "")  ?>">
+                                    <input type="hidden" name="idFood" id="idFood" value="<?php echo (isset($idFood) ? $idFood : "")  ?>" />
+                                    <input readonly name="foodTimeText" id="foodTimeText" type="text" class="form-control me-4" style="padding-left:20px !important;" aria-label="Tiempo" aria-describedby="text-addon" value="<?php echo (isset($foodTime) ? $foodTime : "")  ?>">
                                 </div>
                                 <button type="button" class="btn bg-gradient-dark m-0" item-type="tiempo" sel-items items="Tiempos de comida">Seleccionar</button>
                             </div>
                             <div class="mb-3">
                                 <h6 class="text-uppercase text-body text-xs font-weight-bolder">Comida</h6>
                                 <div class="d-flex align-items-center mb-3">
-                                    <input type="hidden" name="idMenu" value="<?php echo (isset($idMenu) ? $idMenu : "")  ?>" />
-                                    <input disabled type="text" class="form-control me-4" style="padding-left:20px !important;" aria-label="Comida" aria-describedby="text-addon" value="<?php echo (isset($menu) ? $menu : "")  ?>">
+                                    <input type="hidden" name="idMenu" id="idMenu" value="<?php echo (isset($idMenu) ? $idMenu : "")  ?>" />
+                                    <input readonly name="menuText" id="menuText" type="text" class="form-control me-4" style="padding-left:20px !important;" aria-label="Comida" aria-describedby="text-addon" value="<?php echo (isset($menu) ? $menu : "")  ?>">
                                 </div>
                                 <button type="button" class="btn bg-gradient-dark m-0" item-type="comida" sel-items items="Comidas">Seleccionar</button>
                             </div>
@@ -144,6 +192,18 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
                                 <h6 class="text-uppercase text-body text-xs font-weight-bolder">Descripción</h6>
                                 <div>
                                     <textarea class="form-control" id="formDescription" name="description" rows="3"><?php echo (isset($description) ? $description : "")  ?></textarea>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="text-uppercase text-body text-xs font-weight-bolder">Hora de inicio</h6>
+                                <div>
+                                    <input type="time" required class="form-control" id="startTime" name="startTime" aria-label="date" aria-describedby="text-addon" value="<?php echo (isset($startTime) ? $startTime : "")  ?>">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="text-uppercase text-body text-xs font-weight-bolder">Hora de fin</h6>
+                                <div>
+                                    <input type="time" required class="form-control" id="endTime" name="endTime" aria-label="date" aria-describedby="text-addon" value="<?php echo (isset($endTime) ? $endTime : "")  ?>">
                                 </div>
                             </div>
                             <div class="text-center">
@@ -180,14 +240,15 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
                                         <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Identificador</th>
                                         <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 ">Tiempo de comida</th>
                                         <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 ">Menu</th>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 ">Hora</th>
+                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 ">Hora inicio</th>
+                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 ">Hora fin</th>
                                         <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 ">Descripción</th>
                                         <th class="text-secondary opacity-7"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $items = DateMenu::getAllDateMenus($connection, (new DateTime($_SESSION["date_start"]))->format('Y-m-d'));
+                                    $items = DateMenu::getAllDateMenus($connection, (new DateTime($_SESSION["date"]))->format('Y-m-d'));
                                     if ($items) {
                                         while ($row = $items->fetch_array(MYSQLI_ASSOC)) {
                                             echo "
@@ -205,7 +266,11 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
                                                 </td>
 
                                                 <td class=\"align-middle text-center text-sm\">
-                                                    <p class=\"text-xs font-weight-bold mb-0\">" .(new DateTime($row["start"]))->format('H:i') . "</p>
+                                                    <p class=\"text-xs font-weight-bold mb-0\">" . (new DateTime($row["start"]))->format('h:i A') . "</p>
+                                                </td>
+
+                                                <td class=\"align-middle text-center text-sm\">
+                                                    <p class=\"text-xs font-weight-bold mb-0\">" . (new DateTime($row["end"]))->format('h:i A') . "</p>
                                                 </td>
 
                                                 <td class=\"align-middle text-center text-sm text-wrap\">
@@ -322,5 +387,23 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
                 });
             });
         }
+    </script>
+    <script>
+        document.getElementById("clearMainForm").addEventListener("click", (e) => {
+            window.history.replaceState({}, document.title, `${window.location.pathname}`);
+            document.getElementById("mainFormTitle").textContent = "Asignar comida";
+            let mainField = document.getElementById("mainField");
+            if (mainField) mainField.remove();
+            document.getElementById("idFood").value = "";
+            document.getElementById("foodTimeText").value = "";
+            document.getElementById("menuText").value = "";
+            document.getElementById("idMenu").value = "";
+            document.getElementById("formDescription").value = "";
+            document.getElementById("startTime").value = "";
+            document.getElementById("endTime").value = "";
+            document.getElementById("mainFormButton").textContent = "Crear";
+            let formMsg = document.getElementById("errorMessageMainForm");
+            if (formMsg) formMsg.remove();
+        });
     </script>
 </body>
