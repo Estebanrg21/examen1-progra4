@@ -41,16 +41,13 @@
     border-color:  #a31e32;
 }
 .fc-daygrid-event{
-    height: 100px;
+    /*height: 100px;*/
     background:  #a31e32;
     color:white;
 }
 .fc-daygrid-event:hover{
     background:  #701523;
-}
-.fc-axis{
-    min-width:100px; 
- 
+    color:white;
 }
 @media only screen and (max-width: 402px) {
     body {
@@ -58,8 +55,13 @@
     }
     #calendar .fc-header-toolbar div:last-child{
         display: flex;
-        
-        
         justify-content: space-between;
+    }
+    #calendar .fc-header-toolbar{
+        display: flex;
+        flex-direction: column;
+    }
+    #calendar .fc-header-toolbar div:first-child{
+        margin-bottom: 2%;
     }
   }

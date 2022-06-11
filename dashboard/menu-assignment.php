@@ -69,9 +69,9 @@ if (areSubmitted(["date"])) {
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek',
+                initialView: 'dayGridMonth',
                 headerToolbar: {
-                    right: 'timeGridWeek prev,next'
+                    right: 'timeGridWeek dayGridMonth prev,next'
                 },
                 scrollTime:'07:00:00',
                 locale: 'es',
@@ -88,6 +88,7 @@ if (areSubmitted(["date"])) {
                 expandRows: true,
                 selectable: true,
                 displayEventEnd: true,
+                dayMaxEventRows:true,
                 eventMaxStack: 1,
                 dateClick: function(info) {
                     formDate([{
@@ -127,7 +128,7 @@ if (areSubmitted(["date"])) {
 
 <body class="g-sidenav-show  bg-gray-100">
     <!-- Aside -->
-    <?php $option = 5;
+    <?php $option = 6;
     require_once(__DIR__ . '../../templates/aside.php') ?>
     <!-- End Aside -->
 

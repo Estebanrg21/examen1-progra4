@@ -138,14 +138,13 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
     <?php require_once(__DIR__ . '/../../templates/modal.php') ?>
     <!-- End Modal -->
     <!-- Aside -->
-    <?php $option = 5;
+    <?php $option = 6;
     require_once(__DIR__ . '/../../templates/aside.php') ?>
     <!-- End Aside -->
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
         <!-- Navbar -->
         <?php $navTitle = "Asignación de menús a fecha: " . (new DateTime($_SESSION['date']))->format('d/m/Y');
         if (isset($blockIdInput)) $navTitle = "Asignación de menús: " . (new DateTime($_SESSION['date']))->format('d/m/Y');
-        $linksNav = [["/dashboard/menu-assignment.php", "Asignar menús!", "fa-calendar-check"]];
         require_once(__DIR__ . '/../../templates/navbar.php') ?>
         <!-- End Navbar -->
         <div class="container-fluid py-4 row">

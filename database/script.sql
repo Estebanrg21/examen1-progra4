@@ -66,7 +66,7 @@ CREATE TABLE menus_details(
     FOREIGN KEY (id_menu) REFERENCES menus(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (creator) REFERENCES users(email) ON UPDATE CASCADE ON DELETE CASCADE,
     INDEX(day_served),
-    UNIQUE(id_food_time,day_served)
+    UNIQUE(id_menu,day_served)
 );
 
 insert into users values ("scot@estebanramirez.xyz",md5("muvpeq-5dikcU-beqgoz"),"Super usuario",1,0);
