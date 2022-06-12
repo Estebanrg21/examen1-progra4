@@ -1,9 +1,10 @@
 <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main" style="z-index:99;">
   <div class="sidenav-header">
-    <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-    <a class="navbar-brand m-0" href="/">
-      <img src="/assets/img/logo-ct.png" class="navbar-brand-img h-100" alt="main_logo">
-      <span class="ms-1 font-weight-bold">SCOT</span>
+    <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" style="color:white !important" aria-hidden="true" id="iconSidenav"></i>
+    <a class="navbar-brand m-0 h-100 d-flex align-items-center justify-content-center" href="/" style="padding: 0;">
+      <div style="width: 50px; height:80%;background-image: url('/assets/img/only-logo.svg');background-size: contain;background-position: center;background-repeat: no-repeat;"></div>
+      <!-- <img src="/assets/img/only-logo.svg" class="navbar-brand-img h-100" alt="main_logo"> -->
+      <h5 class="ms-1 font-weight-bold p-0 m-0">SCOT</h5>
     </a>
   </div>
   <hr class="horizontal dark mt-0">

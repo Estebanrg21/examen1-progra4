@@ -49,12 +49,16 @@ if (areSubmitted(["id"])) {
         }
 
         body {
-            background: #2B3843;
+            background: #fff;
 
         }
 
         body * {
-            color: white;
+            color: #2B3843;
+        }
+
+        nav * {
+            color: #2B3843 !important;
         }
 
         .shadow-blur h6,
@@ -68,12 +72,59 @@ if (areSubmitted(["id"])) {
         }
 
         .fc-daygrid-dot-event:hover {
-            background: white;
+            background: #2B3843;
+        }
 
+        .fc-col-header-cell-cushion {
+            color: #2B3843;
+        }
+
+        .fc-col-header-cell-cushion:hover {
+            color: #2B3843;
+        }
+
+        #calendar .fc-event-time {
+            color: white;
+        }
+
+        #calendar .fc-event-title {
+            color: white;
         }
 
         .fc-daygrid-dot-event:hover * {
+            color: white;
+        }
+
+        .fc-theme-standard .fc-scrollgrid {
+            border: 1px solid #2B3843;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .fc-daygrid-more-link,
+        .fc-more-link {
             color: #2B3843;
+        }
+
+        .fc-theme-standard td,
+        .fc-theme-standard th {
+            border: 1px solid #2B3843;
+        }
+
+        #footerContainer * {
+            color: #2B3843 !important;
+        }
+
+        #footerContainer footer {
+            width: 100%;
+        }
+
+        #footerContainer footer div.row {
+            justify-content: center !important;
+        }
+
+        footer .copyright {
+            text-align: center !important;
         }
     </style>
     <script>
@@ -99,10 +150,18 @@ if (areSubmitted(["id"])) {
                 headerToolbar: {
                     end: ''
                 },
+                height: "80vh",
                 locale: 'es',
                 hiddenDays: [0, 6],
                 editable: false,
                 selectable: true,
+                eventMaxStack: 1,
+                dayMaxEventRows: true, // for all non-TimeGrid views
+                views: {
+                    dayGridWeek: {
+                        dayMaxEventRows: 2 // adjust to 6 only for timeGridWeek/timeGridDay
+                    }
+                },
                 events: {
                     height: "100%",
                     url: '/dashboard/menu-assignment.php',
@@ -127,12 +186,12 @@ if (areSubmitted(["id"])) {
 <body>
     <div class="modal fade" id="Modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down position-relative">
-            <div class="px-3  modal-content d-flex flex-column justify-content-around bg-modal-menu">
+            <div class="px-3  modal-content bg-modal-menu">
                 <div class="modal-header bg-modal-menu">
                     <h5 class="modal-title" id="exampleModalToggleLabel2">Información del menú</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body d-flex flex-column justify-content-evenly" id="modalBody">
+                <div class="modal-body " id="modalBody">
                     <div>
                         <h6>Tiempo de comida:</h6>
                         <p><?php echo (isset($tname) ? $tname : "") ?></p>
@@ -158,7 +217,7 @@ if (areSubmitted(["id"])) {
         <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" navbar-scroll="true">
             <div class="container-fluid py-1 px-3">
                 <nav aria-label="breadcrumb">
-                    <h6 class="font-weight-bolder mb-0">Menú de la semana</h6>
+                    <h6 class="font-weight-bolder mb-0">Sistema de Control de Tiempos de Comida </h6>
                 </nav>
                 <div class="navbar-nav mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
                     <ul class="navbar-nav  justify-content-end">
@@ -175,9 +234,19 @@ if (areSubmitted(["id"])) {
         <!-- End Navbar -->
         <div class="d-flex justify-content-center align-items-center ">
             <div class="container-fluid py-4 m-0 row bg-red col-12 col-md-9 ">
+                <a href="http://www.colegiohumanistico.una.ac.cr/">
+                    <div style="height:50vh; min-height: 300px; background-image: url('/assets/img/fullLogo.jpg');background-size: contain;background-position: center;background-repeat: no-repeat;" class="col-sm-12 mb-4"></div>
+                </a>
+                <div class="d-flex w-100 justify-content-center mt-5">
+                    <h2>Menú de la semana</h2>
+                </div>
                 <div id='calendar'></div>
-
             </div>
+        </div>
+        <div id="footerContainer">
+            <!-- Footer -->
+            <?php require_once(__DIR__ . '/templates/footer.php') ?>
+            <!-- End Footer -->
         </div>
     </main>
     <!-- Scripts -->

@@ -133,7 +133,7 @@ if (isset($errorSubmission) || (isset($isOk) && !$isOk)) {
 <?php $hdTitle = "SCOT: Asignar menús";
 require_once(__DIR__ . '/../../templates/header.php') ?>
 
-<body class="g-sidenav-show  bg-gray-100">
+<body class="g-sidenav-show ">
     <!-- Modal -->
     <?php require_once(__DIR__ . '/../../templates/modal.php') ?>
     <!-- End Modal -->
@@ -225,7 +225,7 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
             <!-- End Show Items -->
         </div>
         <!-- Show Show Date Menus -->
-        <div class="row mt-4 mw-100">
+        <div class="row mt-4 mw-100 m-0">
             <div class="col-12">
                 <div class="card mb-4">
                     <div class="card-header pb-0">
@@ -319,6 +319,9 @@ require_once(__DIR__ . '/../../templates/header.php') ?>
             </div>
         </div>
         <!-- End Show Date Menus -->
+        <!-- Footer -->
+        <?php require_once(__DIR__ . '/../../templates/footer.php') ?>
+        <!-- End Footer -->
     </main>
     <!-- Scripts -->
     <?php require_once(__DIR__ . '/../../templates/scripts.php') ?>

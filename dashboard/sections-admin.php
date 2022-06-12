@@ -16,7 +16,7 @@
 session_start();
 $sessionCondition = (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']);
 $headerLoc = "/dashboard.php";
-require_once(__DIR__."/../templates/sessionValidation.php");
+require_once(__DIR__ . "/../templates/sessionValidation.php");
 require_once(__DIR__ . "/../models/Section.php");
 require_once(__DIR__ . "/../database/database.php");
 require_once(__DIR__ . "/../util.php");
@@ -81,7 +81,7 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
 <?php $hdTitle = "SCOT: Secciones";
 require_once(__DIR__ . '../../templates/header.php') ?>
 
-<body class="g-sidenav-show  bg-gray-100">
+<body class="g-sidenav-show">
   <!-- Modal -->
   <?php require_once(__DIR__ . '../../templates/modal.php') ?>
   <!-- End Modal -->
@@ -206,21 +206,9 @@ require_once(__DIR__ . '../../templates/header.php') ?>
           </div>
         </div>
         <!-- End Show sections -->
-        <footer class="footer pt-3  ">
-          <div class="container-fluid">
-            <div class="row align-items-center justify-content-lg-between">
-              <div class="col-lg-6 mb-lg-0 mb-4">
-                <div class="copyright text-center text-sm text-muted text-lg-start">
-                  © <script>
-                    document.write(new Date().getFullYear())
-                  </script>,
-                  made with <i class="fa fa-heart"></i> by
-                  <a href="https://estebanramirez.xyz" class="font-weight-bold" target="_blank">Esteban Ramírez</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </footer>
+        <!-- Footer -->
+        <?php require_once(__DIR__ . '../../templates/footer.php') ?>
+        <!-- End Footer -->
       </div>
   </main>
   <!-- Scripts -->

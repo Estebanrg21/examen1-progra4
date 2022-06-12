@@ -45,27 +45,21 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
-  <link rel="icon" type="image/png" href="../assets/img/favicon.png">
-  <title>
-    SCOT: Login
-  </title>
-  <!--     Fonts and icons     -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
-  <!-- Nucleo Icons -->
-  <link href="../assets/css/nucleo-icons.css" rel="stylesheet" />
-  <link href="../assets/css/nucleo-svg.css" rel="stylesheet" />
-  <!-- Font Awesome Icons -->
-  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-  <link href="../assets/css/nucleo-svg.css" rel="stylesheet" />
-  <!-- CSS Files -->
-  <link id="pagestyle" href="../assets/css/soft-ui-dashboard.css?v=1.0.5" rel="stylesheet" />
-</head>
+<?php $hdTitle = "SCOT: Login";
+require_once(__DIR__ . '/templates/header.php') ?>
 
 <body class="">
+  <style>
+    #loginFooter footer{
+      width: 100%;
+    }
+    #loginFooter footer div.row{
+      justify-content: center !important;
+    }
+    footer .copyright{
+      text-align: center !important;
+    }
+  </style>
   <div class="container position-sticky z-index-sticky top-0">
     <div class="row">
       <div class="col-12">
@@ -80,18 +74,18 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
               <div class="card card-plain mt-8">
                 <div class="card-header pb-0 text-left bg-transparent">
-                  <h3 class="font-weight-bolder text-info text-gradient">Login</h3>
+                  <h3 class="font-weight-bolder text-info " style="color:white !important;">Login</h3>
                 </div>
                 <div class="card-body">
                   <form role="form" action="#" method="POST">
                     <?php if (isset($loginError)) : ?>
                       <p class="text-danger text-xs font-weight-bolder p-0 mb-3" id="errorMessageValidate"><?php echo $loginError; ?></p>
                     <?php endif; ?>
-                    <label>Email</label>
+                    <label style="color:white">Email</label>
                     <div class="mb-3">
                       <input type="email" name="email" class="form-control" placeholder="Email" aria-label="Email" aria-describedby="email-addon">
                     </div>
-                    <label>Contraseña</label>
+                    <label style="color:white">Contraseña</label>
                     <div class="mb-3">
                       <input type="password" name="password" class="form-control" placeholder="Contraseña" aria-label="Password" aria-describedby="password-addon">
                     </div>
@@ -102,33 +96,17 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
                 </div>
               </div>
             </div>
-            <div class="col-md-6">
-              <div class="oblique position-absolute top-0 h-100 d-md-block d-none me-n8">
-                <div class="oblique-image bg-cover position-absolute fixed-top ms-auto h-100 z-index-0 ms-n6" style="background-image:url('../assets/img/curved-images/curved6.jpg')"></div>
-              </div>
-            </div>
+
           </div>
         </div>
       </div>
     </section>
   </main>
-  <!-- -------- START FOOTER 3 w/ COMPANY DESCRIPTION WITH LINKS & SOCIAL ICONS & COPYRIGHT ------- -->
-  <footer class="footer py-5">
-    <div class="container">
-      <div class="row ">
-        <div class="copyright text-center text-sm text-muted text-lg-start d-flex justify-content-center">
-          <div>
-            © <script>
-              document.write(new Date().getFullYear())
-            </script>,
-            made with <i class="fa fa-heart"></i> by
-            <a href="https://estebanramirez.xyz" class="font-weight-bold" target="_blank">Esteban Ramírez</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </footer>
-  <!-- -------- END FOOTER 3 w/ COMPANY DESCRIPTION WITH LINKS & SOCIAL ICONS & COPYRIGHT ------- -->
+  <div class="d-flex justify-content-center" id="loginFooter" >
+    <!-- Footer -->
+    <?php require_once(__DIR__ . '/templates/footer.php') ?>
+    <!-- End Footer -->
+  </div>
   <!--   Core JS Files   -->
   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>

@@ -390,7 +390,7 @@ function toggleSidenav() {
 
   } else {
     body.classList.add(className);
-    sidenav.classList.add('bg-white');
+    sidenav.classList.add('blur');
     sidenav.classList.remove('bg-transparent');
     iconSidenav.classList.remove('d-none');
   }
@@ -407,10 +407,10 @@ function navbarColorOnResize() {
     if (referenceButtons.classList.contains('active') && referenceButtons.getAttribute('data-class') === 'bg-transparent') {
       sidenav.classList.remove('bg-white');
     } else {
-      sidenav.classList.add('bg-white');
+      sidenav.classList.add('blur');
     }
   } else {
-    sidenav.classList.add('bg-white');
+    sidenav.classList.add('blur');
     sidenav.classList.remove('bg-transparent');
   }
 }

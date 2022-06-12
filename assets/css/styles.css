@@ -1,71 +1,190 @@
-.success-modal-container{
+body {
+    background: #a31e32;
+    color: white;
+}
+
+.card-header h6 {
+    color: #344767;
+}
+
+.success-modal-container {
     background: none !important;
 }
-.custom-modal-header{
-    border-bottom:none !important;
+
+.custom-modal-header {
+    border-bottom: none !important;
 }
-.success-modal, .danger-modal{
+
+.success-modal,
+.danger-modal {
     border: none !important;
     height: 100% !important;
 }
-.success-modal{
+
+.success-modal {
     background-color: #3aa123 !important;
 }
-.danger-modal{
-    background-color:#ed4b00 !important;
+
+.danger-modal {
+    background-color: #ed4b00 !important;
 }
-.success-modal-animation, .danger-modal-animation{
+
+.success-modal-animation,
+.danger-modal-animation {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
 }
-.modal-button-confirm{
+
+.modal-button-confirm {
     border-color: #fff !important;
-    color:#fff !important;
+    color: #fff !important;
 }
-.bg-modal-menu{
-    background:  #a31e32 !important;
+
+.bg-modal-menu {
+    background: #a31e32 !important;
     color: white !important;
 }
+
 .bg-modal-menu * {
     color: white !important;
 }
 
-.fc .fc-button-primary:not(:disabled).fc-button-active,.fc .fc-button-primary:hover{
-    background:  #701523;
-    border-color:#701523;
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:hover {
+    background: #192127;
+    border-color: #192127;
 }
-.fc .fc-button-primary{
-    background:  #a31e32;
-    border-color:  #a31e32;
+
+.fc .fc-button-primary {
+    background: #2B3843;
+    border-color: #2B3843;
 }
-.fc-daygrid-event{
-    background:  #a31e32;
+
+.fc-daygrid-event {
+    background: #2B3843;
+    color: white;
+}
+
+.fc-v-event {
+    border-color: #2B3843;
+    background: #2B3843;
+    color: white;
+}
+
+.fc-col-header-cell-cushion {
+    color: white;
+}
+
+.fc-col-header-cell-cushion:hover {
+    color: rgb(190, 190, 190);
+}
+
+.fc-daygrid-event:hover {
+    background: #701523;
+    color: white;
+}
+
+.fc-daygrid-day-number {
+    color: white;
+}
+
+.fc-daygrid-more-link,
+.fc-more-link {
+    color: white;
+}
+
+aside {
+    background: #a31e32;
+}
+
+.navbar .sidenav-toggler-inner .sidenav-toggler-line {
+    background: white;
+}
+
+.navbar-vertical .navbar-nav>.nav-item .nav-link.active .icon {
+    background-image: linear-gradient(310deg, #2B3843 0%, #2B3843 100%);
+}
+
+.navbar-vertical .navbar-nav>.nav-item .nav-link.active .icon svg {
+    color: white;
+    fill: white;
+
+}
+
+nav span,
+nav i {
+    color: white;
+}
+
+nav .bg-dark {
+    background-color: white !important;
+}
+
+.navbar-vertical.navbar-expand-xs .navbar-nav>.nav-item>.nav-link .icon svg .color-background {
+    fill: black;
+}
+
+.navbar-vertical .navbar-nav>.nav-item .nav-link.active .icon svg .color-background {
+    fill: white;
+}
+
+.bg-gradient-dark {
+    background-image: linear-gradient(310deg, #666 0%, #666 100%);
+}
+
+.bg-gradient-info {
+    background-image: linear-gradient(310deg, #2B3843 0%, #2B3843 100%);
+}
+
+
+.blur {
+    -webkit-backdrop-filter: saturate(200%) blur(30px);
+    backdrop-filter: saturate(200%) blur(30px);
+    background-color: rgba(100, 100, 100, 0.8) !important;
+}
+
+.shadow-blur {
+    box-shadow: none !important;
+}
+
+.navbar-vertical .navbar-nav>.nav-item .nav-link.active {
+    color: #344767;
+    background-color: #fff !important;
+}
+.fc-popover-header{
+    color:#2B3843;
+}
+footer .text-muted, footer *{
+    color:white !important;
+}
+
+.navbar .navbar-brand {
     color:white;
 }
-.fc-v-event{
-    border-color:  #a31e32;
-    background:  #a31e32;
-    color:white;
+.btn-link{
+    color:#666;
 }
-.fc-daygrid-event:hover{
-    background:  #701523;
-    color:white;
+.btn-link:hover{
+    color: #666;
+}
+#uploadHelp i{
+    color:black;
 }
 @media only screen and (max-width: 402px) {
-    body {
-      background-color: lightblue;
-    }
-    #calendar .fc-header-toolbar div:last-child{
+
+    #calendar .fc-header-toolbar div:last-child {
         display: flex;
         justify-content: space-between;
     }
-    #calendar .fc-header-toolbar{
+
+    #calendar .fc-header-toolbar {
         display: flex;
         flex-direction: column;
     }
-    #calendar .fc-header-toolbar div:first-child{
+
+    #calendar .fc-header-toolbar div:first-child {
         margin-bottom: 2%;
     }
-  }
+}

@@ -135,7 +135,7 @@ if (areSubmitted(["date"])) {
     <link href="/assets/css/styles.css" rel="stylesheet" />
 </head>
 
-<body class="g-sidenav-show  bg-gray-100">
+<body class="g-sidenav-show ">
     <!-- Aside -->
     <?php $option = 6;
     require_once(__DIR__ . '../../templates/aside.php') ?>
@@ -150,6 +150,9 @@ if (areSubmitted(["date"])) {
         <div class="container-fluid py-4">
             <div id='calendar'></div>
         </div>
+        <!-- Footer -->
+        <?php require_once(__DIR__ . '../../templates/footer.php') ?>
+        <!-- End Footer -->
     </main>
     <!-- Scripts -->
     <?php require_once(__DIR__ . '../../templates/scripts.php') ?>

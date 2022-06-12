@@ -97,7 +97,7 @@ if (isset($isOk)) {
 <?php $hdTitle = "SCOT: Estudiantes";
 require_once(__DIR__ . '../../templates/header.php') ?>
 
-<body class="g-sidenav-show  bg-gray-100">
+<body class="g-sidenav-show  ">
   <div class="modal fade" id="Modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down position-relative">
       <div class="px-3  modal-content  bg-modal-menu">
@@ -284,21 +284,9 @@ require_once(__DIR__ . '../../templates/header.php') ?>
         </div>
 
 
-        <footer class="footer pt-3  ">
-          <div class="container-fluid">
-            <div class="row align-items-center justify-content-lg-between">
-              <div class="col-lg-6 mb-lg-0 mb-4">
-                <div class="copyright text-center text-sm text-muted text-lg-start">
-                  © <script>
-                    document.write(new Date().getFullYear())
-                  </script>,
-                  made with <i class="fa fa-heart"></i> by
-                  <a href="https://estebanramirez.xyz" class="font-weight-bold" target="_blank">Esteban Ramírez</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </footer>
+         <!-- Footer -->
+         <?php require_once(__DIR__ . '../../templates/footer.php') ?>
+        <!-- End Footer -->
       </div>
   </main>
   <!-- Scripts -->
