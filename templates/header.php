@@ -15,4 +15,5 @@
     <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
     <!-- CSS Files -->
     <link id="pagestyle" href="/assets/css/soft-ui-dashboard.css" rel="stylesheet" />
+    <link href="/assets/css/styles.css" rel="stylesheet" />
   </head>

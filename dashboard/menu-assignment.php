@@ -73,22 +73,31 @@ if (areSubmitted(["date"])) {
                 headerToolbar: {
                     right: 'timeGridWeek dayGridMonth prev,next'
                 },
-                scrollTime:'07:00:00',
+                scrollTime: '07:00:00',
                 locale: 'es',
                 hiddenDays: [0, 6],
                 allDaySlot: false,
                 eventMinHeight: 50,
                 navLinks: true,
+                buttonText: {
+                    month: 'Mes',
+                    week: 'Semana',
+                },
                 slotDuration: '01:00',
                 slotLabelFormat: {
                     hour: '2-digit',
                     minute: '2-digit',
                     hour12: true
                 },
+                dayMaxEventRows: true, // for all non-TimeGrid views
+                views: {
+                    dayGridMonth: {
+                        dayMaxEventRows: 3 // adjust to 6 only for timeGridWeek/timeGridDay
+                    }
+                },
                 expandRows: true,
                 selectable: true,
                 displayEventEnd: true,
-                dayMaxEventRows:true,
                 eventMaxStack: 1,
                 dateClick: function(info) {
                     formDate([{

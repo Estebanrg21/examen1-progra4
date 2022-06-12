@@ -109,7 +109,7 @@ if (isset($isOk)) {
         $classModal = "success";
     }
 }
-if (isset($errorSubmission)) {
+if (isset($errorSubmission) || (isset($isOk) && !$isOk)) {
     $startTime =  $_POST['startTime'];
     $endTime =  $_POST['endTime'];
     $description = $_POST['description'];

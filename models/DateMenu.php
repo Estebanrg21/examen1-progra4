@@ -93,15 +93,15 @@ class DateMenu
             if (count($fields) == 0) {
                 $response = 14;
             } else {
-                if ($this->isUnique()) {
-                    $statement = $this->connection->prepare("UPDATE menus_details SET " . $fieldsSentence . " WHERE id=?");
-                    $fields = [...$fields, $this->id];
-                    $fieldMap = $fieldMap . "s";
-                    $statement->bind_param($fieldMap, ...$fields);
-                    $response = 2;
-                } else {
-                    $response = 13;
-                }
+                if (strpos($fieldsSentence, 'id_menu') !== false)
+                    if (!$this->isUnique())
+                        $response = 13;
+
+                $statement = $this->connection->prepare("UPDATE menus_details SET " . $fieldsSentence . " WHERE id=?");
+                $fields = [...$fields, $this->id];
+                $fieldMap = $fieldMap . "s";
+                $statement->bind_param($fieldMap, ...$fields);
+                $response = 2;
             }
         } else {
             if ($this->isUnique()) {

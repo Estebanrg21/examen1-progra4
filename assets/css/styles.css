@@ -41,7 +41,11 @@
     border-color:  #a31e32;
 }
 .fc-daygrid-event{
-    /*height: 100px;*/
+    background:  #a31e32;
+    color:white;
+}
+.fc-v-event{
+    border-color:  #a31e32;
     background:  #a31e32;
     color:white;
 }

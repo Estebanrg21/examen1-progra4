@@ -4,10 +4,10 @@ require_once(__DIR__ . "/util.php");
 require_once(__DIR__ . "/database/database.php");
 require_once(__DIR__ . "/models/DateMenu.php");
 [$db, $connection] = Database::getConnection();
-if(areSubmitted(["id"])){
-    if(checkInput(["id"])){
-        $menu = DateMenu::getDateMenu($connection,$_POST["id"],false,true);
-        if($menu){
+if (areSubmitted(["id"])) {
+    if (checkInput(["id"])) {
+        $menu = DateMenu::getDateMenu($connection, $_POST["id"], false, true);
+        if ($menu) {
             $tname = $menu["tname"];
             $mname = $menu["mname"];
             $start = $menu["start"];
@@ -135,23 +135,19 @@ if(areSubmitted(["id"])){
                 <div class="modal-body d-flex flex-column justify-content-evenly" id="modalBody">
                     <div>
                         <h6>Tiempo de comida:</h6>
-                        <p><?php echo (isset($tname) ?$tname : "") ?></p>
+                        <p><?php echo (isset($tname) ? $tname : "") ?></p>
                     </div>
                     <div>
-                        <h6>Empieza:</h6>
-                        <p><?php echo (isset($start) ?(new DateTime($start))->format('H:i A') : "") ?></p>
-                    </div>
-                    <div>
-                        <h6>Termina:</h6>
-                        <p><?php echo (isset($end) ?(new DateTime($end))->format('H:i A') : "") ?></p>
+                        <h6>Tiempo:</h6>
+                        <p><?php echo (isset($start) ? (new DateTime($start))->format('H:i A') : "") ?> - <?php echo (isset($end) ? (new DateTime($end))->format('H:i A') : "") ?></p>
                     </div>
                     <div>
                         <h6>Menú:</h6>
-                        <p><?php echo (isset($mname) ?$mname : "") ?></p>
+                        <p><?php echo (isset($mname) ? $mname : "") ?></p>
                     </div>
                     <div>
                         <h6>Descripción:</h6>
-                        <p><?php echo (isset($description) ?$description : "") ?></p>
+                        <p><?php echo (isset($description) ? $description : "") ?></p>
                     </div>
                 </div>
             </div>
@@ -180,6 +176,7 @@ if(areSubmitted(["id"])){
         <div class="d-flex justify-content-center align-items-center ">
             <div class="container-fluid py-4 m-0 row bg-red col-12 col-md-9 ">
                 <div id='calendar'></div>
+
             </div>
         </div>
     </main>
@@ -194,6 +191,29 @@ if(areSubmitted(["id"])){
         <?php if (isset($menu)) : ?>
             openModal();
         <?php endif; ?>
+    </script>
+    <script>
+        const targetNode = document.body;
+        const config = {
+            attributes: true,
+            childList: true,
+            subtree: true
+        };
+        const callback = function(mutationList, observer) {
+            for (const mutation of mutationList) {
+                if (mutation.type === 'childList') {
+                    let tableContainer = document.querySelector("div[class='fc-daygrid fc-dayGridWeek-view fc-view'");
+                    if (tableContainer) {
+                        let tableContParent = tableContainer.parentNode;
+                        tableContParent.style.overflowX = "auto";
+                        tableContainer.style.minWidth = "500px";
+                        observer.disconnect();
+                    }
+                }
+            }
+        };
+        const observer = new MutationObserver(callback);
+        observer.observe(targetNode, config);
     </script>
 </body>
 
