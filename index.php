@@ -206,7 +206,7 @@ if (areSubmitted(["id"])) {
                     if (tableContainer) {
                         let tableContParent = tableContainer.parentNode;
                         tableContParent.style.overflowX = "auto";
-                        tableContainer.style.minWidth = "500px";
+                        tableContainer.style.minWidth = "600px";
                         observer.disconnect();
                     }
                 }

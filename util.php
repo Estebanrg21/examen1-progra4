@@ -154,3 +154,55 @@ function strTieHourAndDate($date, $hour){
 function hourToDateTime($d,$h){
     return new DateTime(strTieHourAndDate($d,$h)); 
 }
+
+/*  Obtenido de https://stackoverflow.com/a/25370978/11449132 */
+// Retorna el limite de tamaño de archivo en bytes basado en la variable de PHP 'upload_max_filesize' 
+// y post_max_size
+function file_upload_max_size() {
+    static $max_size = -1;
+  
+    if ($max_size < 0) {
+      // Inicia con post_max_size.
+      $post_max_size = parse_size(ini_get('post_max_size'));
+      if ($post_max_size > 0) {
+        $max_size = $post_max_size;
+      }
+  
+      // Si upload_max_size es menos que post_max_size, entonces se utiliza upload_max_size
+      //Esto siempre que upload_max_size sea mayor a 0
+      $upload_max = parse_size(ini_get('upload_max_filesize'));
+      if ($upload_max > 0 && $upload_max < $max_size) {
+        $max_size = $upload_max;
+      }
+    }
+    return $max_size;
+  }
+  
+  function parse_size($size) {
+    $unit = preg_replace('/[^bkmgtpezy]/i', '', $size); // Limpia el string de caracteres no unitarios del parámetro size
+    $size = preg_replace('/[^0-9\.]/', '', $size); // Limpia el string de caracteres no numéricos del parámetro size
+
+    //Si el size es dado con una unidad de medida (que se obtiene en la variable $unit) entonces ...
+    if ($unit) {
+      // Explicación:
+      //Utiliza el caracter en la posición 0 de la variable unit, el cuál hace referencia a si es en Bytes (b), Kilobytes (k)
+      //y así sucesivamente, con la posición en el string ordenado 'bkmgtpezy' donde el index de cada caracter hace referencia
+      //a la potencia que se va a elevar el número 1024, por ejemplo si es b, cuya posición es 0, entonces se elevaría 1024 a 0 
+      //donde el resultado sería 1, y este se multiplicaría por el tamaño que ya viene dado en bytes.
+      //Uso:
+      //Se convierte el size dado a bytes.
+      //Dependiendo del caracter que se encuentre en $unit[0], va a multiplicar la variable $size para retornar su valor en bytes
+      //Por ejemplo, si inicialmente el parámetro size viene dado en 'm' (megabytes) se retorna en bytes mediante la multiplicación 
+      // de 1024^2 (donde '2' es la posición de 'm' en el string bkmgtpezy) con la variable $size (donde su valor es dado en megabytes)
+      return round($size * pow(1024, stripos('bkmgtpezy', $unit[0])));
+    }
+    else {
+      return round($size);
+    }
+  }
+
+  //Convierte bytes a otra medida especificada en el parámetro $unit utilizando base decimal
+  function convertBytesTo($bytes, $unit='m'){
+    $units = "bkmgtpezy";
+    return floor($bytes / pow(1000,stripos($units, $unit)));
+  }

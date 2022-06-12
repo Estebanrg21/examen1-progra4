@@ -16,7 +16,7 @@
 session_start();
 $sessionCondition = (!$_SESSION['isAdmin'] && !$_SESSION['isSuper']);
 $headerLoc = "/dashboard.php";
-require_once(__DIR__."/../templates/sessionValidation.php");
+require_once(__DIR__ . "/../templates/sessionValidation.php");
 require_once(__DIR__ . "/../models/Student.php");
 require_once(__DIR__ . "/../database/database.php");
 require_once(__DIR__ . "/../util.php");
@@ -34,28 +34,7 @@ if (areSubmitted(Student::$INSERT_REQUIRED_FIELDS)) {
     );
     $student->connection = $connection;
     $result = $student->save();
-    if ($result == 500 || $result == 400 || $result == 404 || $result == 403) {
-      if ($result == 500)
-        $errorMessage = "Hubo un error en el servidor";
-      if ($result == 400)
-        $errorMessage = "Campos en formato erróneo";
-      if ($result == 403)
-        $errorMessage = "Sección no existe";
-      if ($result == 404)
-        $errorMessage = "Estudiante no existe";
-      $popErrorModal = true;
-      $classModal = "danger";
-    }
-    if ($result == 200 || $result == 201 || $result == 205) {
-      if ($result == 200)
-        $successMessage = "Estudiante actualizado correctamente!";
-      if ($result == 201)
-        $successMessage = "Estudiante creado correctamente!";
-      if ($result == 205)
-        $successMessage = "Estudiante no necesita actualizarse";
-      $popSuccessModal = true;
-      $classModal = "success";
-    }
+    [$text, $isOk] = Student::$responseCodes[$result];
   } else {
     $errorSubmission = "Los campos no pueden estar vacíos";
   }
@@ -76,20 +55,39 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
         $formButtonText = "Actualizar";
       } else {
         $result = Student::removeStudent($connection, $_GET['id']);
-        if ($result = 204) {
-          $successMessage = "Estudiante eliminado correctamente";
-          $popSuccessModal = true;
-          $classModal = "success";
-        } else {
-          if ($result == 500)
-            $errorMessage = "Hubo un error en el servidor";
-          $popErrorModal = true;
-          $classModal = "danger";
-        }
+        [$text, $isOk] = Student::$responseCodes[$result];
       }
     } else {
       $searchInfo = "Estudiante no encontrado";
     }
+  }
+}
+
+if (isset($_FILES["csvFile"])) {
+  try {
+    #para warning sobre limite de tamaño excedido ver:
+    #https://stackoverflow.com/a/21715692/11449132
+    if (!empty($_FILES['csvFile']['tmp_name'])) {
+      $results = Student::readCsvStudents($connection, file_get_contents($_FILES['csvFile']['tmp_name']));
+      header("Location: /dashboard/student-admin.php");
+      exit;
+    } else {
+      $csvError = "El campo no puede ir vacío";
+    }
+  } catch (\Throwable $th) {
+    $csvError = $th->getMessage();
+  }
+}
+
+if (isset($isOk)) {
+  if (!$isOk) {
+    $errorMessage = $text;
+    $popErrorModal = true;
+    $classModal = "danger";
+  } else {
+    $successMessage = $text;
+    $popSuccessModal = true;
+    $classModal = "success";
   }
 }
 ?>
@@ -100,6 +98,54 @@ if (isset($_GET['id']) && isset($_GET['m'])) {
 require_once(__DIR__ . '../../templates/header.php') ?>
 
 <body class="g-sidenav-show  bg-gray-100">
+  <div class="modal fade" id="Modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down position-relative">
+      <div class="px-3  modal-content  bg-modal-menu">
+        <div class="modal-header bg-modal-menu">
+          <h5 class="modal-title" id="exampleModalToggleLabel2">Información de subida del CSV</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body " id="modalBody" style="-webkit-overflow-scrolling: touch !important;overflow-y: auto !important;">
+          <h5>Puntos a tomar en cuenta:</h5>
+          <ul>
+            <li>
+              <p>Antes de ingresar los estudiantes, deberán de existir las secciones, de lo contrario no se podrán guardar los estudiantes con secciones inexistentes. Si desea agregar secciones, diríjase a la pantalla de administración de secciones</p>
+            </li>
+            <li>
+              <p>El único formato de archivo que se acepta es CSV delimitado por comas</p>
+            </li>
+            <li>
+              <p>Debe obedecer el formato establecido en la plantilla, de lo contrario no se podrán procesar los datos</p>
+            </li>
+            <li>
+              <p>Los campos deben de tener una longitud igual o menor a la siguiente:</p>
+              <ul>
+                <li>
+                  <p><b>id</b> : 12 caracteres</p>
+                </li>
+                <li>
+                  <p><b>nombre</b> : 20 caracteres</p>
+                </li>
+                <li>
+                  <p><b>apellidos</b> : 100 caracteres</p>
+                </li>
+                <li>
+                  <p><b>sección</b> : 10 caracteres</p>
+                </li>
+              </ul>
+            </li>
+            <li><p><b>Tenga cuidado con los espacios en blanco</b>. El sistema los puede tolerar, sin embargo, para evitar resultados no deseados, por favor verifique las entradas</p></li>
+            <li>
+              <p>Una vez que se hayan subido los datos, el sistema los procesará y si no existe ningún error, devolverá un reporte con el resultado para cada estudiante</p>
+            </li>
+            <li>
+              <p>Para descargar la plantilla del formato del archivo, haga click <b><a href="/assets/plantillaEstudiantes.csv" download>aquí</a></b></p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- Modal -->
   <?php require_once(__DIR__ . '../../templates/modal.php') ?>
   <!-- End Modal -->
@@ -132,7 +178,7 @@ require_once(__DIR__ . '../../templates/header.php') ?>
                   if (deleteButton) {
                     deleteButton.addEventListener('click', (e) => {
                       e.preventDefault();
-                      if (confirm('¿Desea eliminar la sección?')) {
+                      if (confirm('¿Desea eliminar el estudiante?')) {
                         e.target.form.submit();
                       }
                     });
@@ -182,8 +228,8 @@ require_once(__DIR__ . '../../templates/header.php') ?>
           </div>
         </div>
         <!-- End Form -->
-        <!-- Search Student -->
         <div class="col-12 col-xl-4 mt-4 mt-lg-0">
+          <!-- Search Student -->
           <div class="card  d-flex">
             <div class="card-header pb-0 p-3">
               <h6 class="mb-0">Buscar estudiante</h6>
@@ -209,8 +255,34 @@ require_once(__DIR__ . '../../templates/header.php') ?>
               </form>
             </div>
           </div>
+          <!-- End Search Student -->
+          <!-- Upload CSV -->
+          <div class="card  d-flex mt-4">
+            <div class="card-header pb-0 p-3 d-flex align-items-center">
+              <h6 class="mb-0">Subir CSV con estudiantes</h6>
+
+              <p class="btn btn-link pe-3 ps-0 mb-0 ms-auto">tamaño máximo: <?php echo convertBytesTo(file_upload_max_size()) . "Mb" ?></p>
+              <span id="uploadHelp"><i class="fa-solid fa-question fa"></i></span>
+            </div>
+            <div class="card-body p-3">
+              <?php if (isset($csvError)) : ?>
+                <p class="text-danger text-xs font-weight-bolder mb-3" id="csvError"><?php echo $csvError; ?></p>
+              <?php endif; ?>
+              <form action="#" method="POST" enctype="multipart/form-data">
+                <div class="align-self-center  d-flex flex-wrap">
+                  <div class="input-group flex-md-fill" style="z-index:98;">
+                    <input type="file" class="form-control" name="csvFile" placeholder="Estudiantes">
+                  </div>
+                  <div class="text-center">
+                    <button type="submit" class="btn bg-gradient-dark w-100 my-4 mb-2">Subir</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <!-- End Upload CSV -->
         </div>
-        <!-- Search Student -->
+
 
         <footer class="footer pt-3  ">
           <div class="container-fluid">
@@ -249,7 +321,19 @@ require_once(__DIR__ . '../../templates/header.php') ?>
       if (deleteButton) deleteButton.remove();
     });
   </script>
+  <script>
+    let uploadHelp = document.getElementById("uploadHelp");
+    if (uploadHelp) {
+      uploadHelp.addEventListener("click", (e) => {
+        openModal()
+      });
+    }
 
+    function openModal() {
+      let modal = new bootstrap.Modal(document.getElementById('Modal'));
+      modal.show();
+    }
+  </script>
 </body>
 
 </html>
